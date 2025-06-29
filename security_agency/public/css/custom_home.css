@@ -1,0 +1,230 @@
+@import url('https://fonts.googleapis.com/css?family=Audiowide');
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #f4f7f9;
+}
+::-webkit-scrollbar-thumb {
+    background: #a0c8e3;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #d4af37;
+}
+
+/* Hover animation */
+@keyframes hoverBg {
+    0% { background: #1b3c59; }
+    50% { background: #a0c8e3; }
+    100% { background: #1b3c59; }
+}
+
+/* Page and workspace background */
+.page-wrapper,
+.page-head,
+[data-page-route="Workspaces"] .layout-main .layout-main-section {
+    background-color: #f0f4f8; /* Soft pastel background */
+    color: #1a1a1a;
+}
+
+/* Cards/widgets */
+.page-form,
+.comment-box,
+.widget,
+.container.my-4,
+.widget.onboarding-widget-box,
+.widget.shortcut-widget-box,
+.widget.links-widget-box,
+.alert-message-container {
+    background-color: #e6ecf2; /* Slightly darker soft card */
+    color: #1a1a1a;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all .25s ease;
+}
+
+.comment-box:hover,
+.widget:hover,
+.container.my-4:hover {
+    transform: translateY(-1px) scale(1.02);
+    z-index: 999;
+    background-color: #dce4ec;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Header styling */
+
+/* Page head */
+.page-head {
+    top: 100px;
+    color: #1a1a1a;
+}
+
+.navbar .navbar-brand {
+    display: flex;
+    align-items: center;
+    position: relative;
+    color: #ffffff;
+}
+
+/* Container */
+.container {
+    width: 98% !important;
+    padding: 0;
+    max-width: inherit !important;
+    color: #1a1a1a;
+}
+
+.page-head .page-head-content {
+    height: var(--page-head-height);
+    padding: 8px 0px;
+    color: #1a1a1a;
+}
+
+/* Sidebar */
+.sidebar-column,
+.layout-side-section {
+    background: #244b6b;
+    color: #ffffff;
+}
+
+/* Sidebar items */
+.standard-sidebar-label,
+.standard-sidebar-item > a,
+.desk-sidebar .standard-sidebar-item > a,
+.search-dialog .search-results .search-sidebar .standard-sidebar-item > a {
+    color: #ffffff !important;
+    text-decoration: none;
+}
+
+.sidebar-item a {
+    padding: 7px 10px;
+    color: #ffffff !important;
+    border-radius: 0 !important;
+    position: relative;
+}
+
+.sidebar-item a:after {
+    content: "» ";
+    position: absolute;
+    top: .45rem;
+    right: 1.25rem;
+    font-size: 1rem;
+    transition: transform .25s ease-in-out;
+}
+
+.sidebar-item a.active,
+.sidebar-item a:hover,
+.desk-sidebar .standard-sidebar-item:hover,
+.desk-sidebar .standard-sidebar-item.selected,
+.search-dialog .search-results .search-sidebar .standard-sidebar-item.selected,
+.standard-sidebar .standard-sidebar-item.selected {
+    color: white;
+    background: linear-gradient(to right, #244b6b, #a0c8e3);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(160, 200, 227, 0.4);
+}
+
+/* Buttons */
+.standard-actions .btn {
+    background: #f2c94c;
+    color: #1b3c59;
+    border: none;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    margin: 10px 5px;
+    transition: 0.3s;
+    text-align: center;
+    font-weight: 600;
+}
+
+.standard-actions .btn:hover {
+    background: #d4af37;
+    color: #ffffff;
+    transform: scale(1.05);
+}
+
+/* Widget titles and links */
+.widget-title,
+.widget.links-widget-box .widget-title,
+.widget-title .ellipsis {
+    color: #1a1a1a;
+}
+
+.widget.links-widget-box .link-item .link-content,
+.widget.links-widget-box .link-item .disabled-link {
+    color: #1a1a1a;
+}
+
+.widget.links-widget-box .link-item .link-content:hover {
+    background: #f2c94c;
+    color: #1b3c59;
+    box-shadow: 0 2px 8px rgba(160, 200, 227, 0.3);
+    padding: 0.5em 1em;
+    border-radius: 15px;
+    transition: 0.2s ease-in-out;
+}
+
+.widget.links-widget-box .indicator-pill.yellow,
+.widget.links-widget-box .indicator-pill.gray {
+    background: #f2c94c;
+    color: black;
+}
+
+/* Links */
+a {
+    color: #244b6b;
+}
+
+/* Footer message */
+.page-footer::before {
+    content: "Developed By A Sahu";
+    display: block;
+    text-align: center;
+    font-family: "Audiowide", monospace;
+    color: #d4af37;
+    font-size: 14px;
+    margin-top: 20px;
+}
+
+/* Icon filters */
+.sidebar-item-icon .icon,
+.icon-btn .icon,
+.icon-btn .es-icon,
+.widget-control .es-icon,
+.step-title .es-icon,
+.link-content .es-icon,
+.sidebar-item-control .drop-icon .es-icon {
+    filter: brightness(0.5) invert(1);
+}
+
+.icon-btn .es-icon:hover,
+.icon-btn .icon:hover {
+    filter: brightness(1) invert(0);
+}
+
+.hidden-xs .icon {
+    filter: brightness(1) invert(0);
+}
+
+/* Toggle button */
+.sidebar-toggle-btn .icon,
+.sidebar-toggle-btn,
+.ellipsis.title-text {
+    color: #1a1a1a;
+}
+
+/* Sidebar section details */
+.layout-side-section .form-sidebar .created-by,
+.layout-side-section .form-sidebar .modified-by,
+.layout-side-section .icon .icon-sm,
+.layout-side-section .sidebar-label,
+.layout-side-section .sidebar-label .icon {
+    color: #ffffff;
+    background-color: #1b3c59;
+    border-radius: 100%;
+}

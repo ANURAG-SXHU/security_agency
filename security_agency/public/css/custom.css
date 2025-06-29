@@ -1,0 +1,31 @@
+/* Mega Logo in Navbar */
+.navbar .app-logo {
+    height: 100px !important;          /* Very tall logo */
+    width: auto !important;
+    max-height: 100px !important;
+    max-width: 200px !important;
+    padding: 0 !important;             /* No padding */
+    margin: 0 !important;              /* No margin */
+    object-fit: contain;
+    display: block;
+}
+
+/* Navbar Container */
+header.navbar,
+nav.navbar {
+    height: 110px !important;
+    background-color: #06293e !important;
+    background-image: none !important;
+    padding-left: 0 !important;        /* Remove space on the left */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Remove extra spacing around the logo container */
+.navbar .navbar-brand {
+    display: flex;
+    align-items: center;
+    padding: 0 !important;
+    margin: 0 !important;
+}

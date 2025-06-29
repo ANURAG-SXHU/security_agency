@@ -1,0 +1,147 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-06-28 16:40:34.581296",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "reporting_to",
+  "upload_selfie",
+  "column_break_fhfu",
+  "site",
+  "status",
+  "check_in_time",
+  "section_break_qmtq",
+  "longitude",
+  "latitude",
+  "column_break_nimf",
+  "gps_location",
+  "gps_status",
+  "section_break_gyal",
+  "map_html",
+  "section_break_zycn",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_zycn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Check-In Request GPS",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "reporting_to",
+   "fieldtype": "Link",
+   "label": "Reporting To",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "upload_selfie",
+   "fieldtype": "Attach Image",
+   "label": "Upload Selfie"
+  },
+  {
+   "fieldname": "column_break_fhfu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "site",
+   "fieldtype": "Data",
+   "label": "Site"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nDraft\nPending\nApproved\nRejected"
+  },
+  {
+   "fieldname": "check_in_time",
+   "fieldtype": "Datetime",
+   "label": "Check in Time"
+  },
+  {
+   "fieldname": "section_break_qmtq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Longitude"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Latitude"
+  },
+  {
+   "fieldname": "column_break_nimf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gps_location",
+   "fieldtype": "Data",
+   "label": "GPS Location"
+  },
+  {
+   "fieldname": "gps_status",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "GPS Status"
+  },
+  {
+   "fieldname": "section_break_gyal",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "map_html",
+   "fieldtype": "HTML",
+   "label": "Map"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-06-28 17:00:14.871484",
+ "modified_by": "Administrator",
+ "module": "Security Agency",
+ "name": "Check-In Request GPS",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

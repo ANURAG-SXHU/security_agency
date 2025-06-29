@@ -1,0 +1,61 @@
+/* ✅ Workspace Shortcut UI Improvements (Web + Android App) */
+
+.workspace .shortcut {
+    background-color: #f9f9f9 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+    margin-bottom: 10px !important;
+    transition: transform 0.2s ease-in-out;
+}
+
+/* 🔁 Hover color */
+.workspace .shortcut:hover {
+    background-color: #e0f7fa !important;
+    transform: scale(1.03);
+}
+
+/* 🔧 Hide external link icons */
+.workspace .shortcut .sidebar-item-icon {
+    display: none !important;
+}
+
+/* 🔢 Badge style */
+.workspace .shortcut .count {
+    font-size: 13px !important;
+    padding: 2px 6px !important;
+    background-color: #007bff !important;
+    color: white !important;
+    border-radius: 8px !important;
+    font-weight: bold;
+}
+
+/* 🎨 Different background colors per shortcut (first few) */
+.workspace .shortcut:nth-child(1) {
+    background-color: #e3f2fd !important; /* Light Blue */
+}
+.workspace .shortcut:nth-child(2) {
+    background-color: #fce4ec !important; /* Light Pink */
+}
+.workspace .shortcut:nth-child(3) {
+    background-color: #e8f5e9 !important; /* Light Green */
+}
+.workspace .shortcut:nth-child(4) {
+    background-color: #fff3e0 !important; /* Light Orange */
+}
+.workspace .shortcut:nth-child(5) {
+    background-color: #ede7f6 !important; /* Light Purple */
+}
+
+/* 🧭 Sidebar & Navbar refinement */
+.layout-side-section {
+    background-color: #ffffff !important;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08) !important;
+}
+
+/* 🔐 Hide footer on login page */
+body[data-route="login"] .footer {
+    display: none !important;
+}
