@@ -162,14 +162,12 @@
 # Copyright (c) 2025, Anurag Sahu and contributors
 # For license information, please see license.txt
 
+# Copyright (c) 2025, Anurag Sahu and contributors
+# For license information, please see license.txt
+
 import frappe
 from frappe.model.document import Document
-import os
-import requests
-import tempfile
-import re
 from frappe.utils import today
-from openai import OpenAI, OpenAIError
 
 
 class Tender(Document):
@@ -179,6 +177,7 @@ class Tender(Document):
 
 
 def get_groq_client():
+    from openai import OpenAI  # ✅ lazy import
     return OpenAI(
         api_key=frappe.conf.get("groq_api_key"),
         base_url="https://api.groq.com/openai/v1"
@@ -187,16 +186,21 @@ def get_groq_client():
 
 @frappe.whitelist()
 def extract_summary(name):
-    import fitz  # ✅ Safe to import here
+    import re
+    import tempfile
+    import os
     import json
-    from dateutil import parser
+    import requests  # ✅ lazy import
+    import fitz  # ✅ lazy import
+    from dateutil import parser  # ✅ lazy import
+    from openai import OpenAIError  # ✅ lazy import
 
     doc = frappe.get_doc("Tender", name)
 
     if not doc.tender_pdf:
         frappe.throw("Please attach or link a Tender PDF.")
 
-    # Handle file download (external or internal)
+    # Remote or local
     if doc.tender_pdf.startswith("http://") or doc.tender_pdf.startswith("https://"):
         response = requests.get(doc.tender_pdf)
         if response.status_code != 200:
@@ -211,7 +215,7 @@ def extract_summary(name):
     with fitz.open(pdf_path) as pdf:
         text = "\n".join(page.get_text() for page in pdf)
 
-    # AI Prompt
+    # Prompt with JSON date output
     prompt = f"""
 From the following tender document, extract:
 
@@ -238,16 +242,15 @@ Tender Text:
             model="llama3-70b-8192",
             messages=[{"role": "user", "content": prompt}]
         )
-
         result = response.choices[0].message.content
 
-        # Text fields
+        # Section parsing
         doc.scope_of_work = result.split("Eligibility")[0].strip()
         if "Eligibility" in result and "Required" in result:
             doc.eligibility_criteria = result.split("Eligibility")[1].split("Required")[0].strip()
             doc.required_documents = result.split("Required")[1].split("{")[0].strip()
 
-        # Parse JSON date block
+        # Extract date JSON
         json_match = re.search(r'\{[\s\S]+?\}', result)
         if json_match:
             try:
@@ -274,6 +277,9 @@ Tender Text:
 
 @frappe.whitelist()
 def ask_ai_for_rate(name):
+    import re
+    from openai import OpenAIError  # ✅ lazy import
+
     doc = frappe.get_doc("Tender", name)
 
     if not doc.scope_summary or not doc.scope_summary.strip():
@@ -296,7 +302,6 @@ Scope:
         result = response.choices[0].message.content
         doc.cost_justification = result
 
-        # ₹ or Rs. extractor
         rate_match = re.search(r'(₹|Rs\.?)\s?([\d,]+)', result)
         if rate_match:
             clean_rate = rate_match.group(2).replace(",", "")
@@ -311,6 +316,8 @@ Scope:
 
 @frappe.whitelist()
 def run_manual_prompt(name):
+    from openai import OpenAIError  # ✅ lazy import
+
     doc = frappe.get_doc("Tender", name)
 
     if not doc.manual_ai_prompt or not doc.manual_ai_prompt.strip():
