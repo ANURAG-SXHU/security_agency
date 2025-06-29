@@ -63,7 +63,7 @@ doc_events = {
         "before_save": [
             "security_agency.security_agency.custom_hooks.joining_fee_deduction",
             "security_agency.security_agency.custom_hooks.advance_request_deduction",
-            "security_agency.security_agency.custom_hooks.mess_tracker_deduction"
+            "security_agency.security_agency.custom_hooks.mess_deduction"
         ]
     }
 }
