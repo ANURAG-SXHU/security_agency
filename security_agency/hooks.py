@@ -34,6 +34,7 @@ app_include_js = [
     "/assets/security_agency/js/logo_redirect.js",
     "/assets/security_agency/js/custom_loader.js",
     "/assets/security_agency/js/employee_group.js",
+    "/assets/security_agency/js/work_ob.js"
     # "/assets/security_agency/js/custom_workspace.js",
     # "/assets/security_agency/js/role_based_ui.js"
 ]

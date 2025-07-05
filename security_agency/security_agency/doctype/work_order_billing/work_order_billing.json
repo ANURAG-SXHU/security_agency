@@ -1,0 +1,116 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-02 22:36:56.868692",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "site_name",
+  "upload_date",
+  "work_order_pdf",
+  "payment_due_date",
+  "rate_per_day",
+  "attendance_xls",
+  "total_present_days",
+  "amount",
+  "guard_attendance_table",
+  "generate_invoice",
+  "draft_invoice_pdf",
+  "final_invoice_pdf",
+  "comments"
+ ],
+ "fields": [
+  {
+   "fieldname": "site_name",
+   "fieldtype": "Data",
+   "label": "Site Name"
+  },
+  {
+   "fieldname": "work_order_pdf",
+   "fieldtype": "Attach",
+   "label": "Work Order PDF"
+  },
+  {
+   "fieldname": "payment_due_date",
+   "fieldtype": "Date",
+   "label": "Payment Due Date"
+  },
+  {
+   "fieldname": "rate_per_day",
+   "fieldtype": "Currency",
+   "label": "Rate Per Day"
+  },
+  {
+   "fieldname": "attendance_xls",
+   "fieldtype": "Attach",
+   "label": "Attendance XLS"
+  },
+  {
+   "fieldname": "total_present_days",
+   "fieldtype": "Int",
+   "label": "Total Present Days"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount"
+  },
+  {
+   "fieldname": "guard_attendance_table",
+   "fieldtype": "Table",
+   "label": "Guard Attendance Table",
+   "options": "Guard Attendance Entry"
+  },
+  {
+   "fieldname": "generate_invoice",
+   "fieldtype": "Button",
+   "label": "Generate Invoice"
+  },
+  {
+   "fieldname": "draft_invoice_pdf",
+   "fieldtype": "Attach",
+   "label": "Draft Invoice PDF"
+  },
+  {
+   "fieldname": "final_invoice_pdf",
+   "fieldtype": "Attach",
+   "label": "Final Invoice PDF"
+  },
+  {
+   "fieldname": "comments",
+   "fieldtype": "Text Editor",
+   "label": "Comments"
+  },
+  {
+   "fieldname": "upload_date",
+   "fieldtype": "Date",
+   "label": "Upload Date"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-07-02 23:16:07.300762",
+ "modified_by": "Administrator",
+ "module": "Security Agency",
+ "name": "Work Order Billing",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

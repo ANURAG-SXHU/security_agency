@@ -18953,5 +18953,49 @@
    }
   ],
   "title": "Mobile Portal"
+ },
+ {
+  "charts": [],
+  "content": "[{\"id\":\"zOQ_U80PbM\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Tender Management</span>\",\"col\":12}},{\"id\":\"EybNpRembv\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tender AI\",\"col\":3}}]",
+  "custom_blocks": [],
+  "docstatus": 0,
+  "doctype": "Workspace",
+  "for_user": "",
+  "hide_custom": 0,
+  "icon": "file",
+  "indicator_color": "green",
+  "is_hidden": 0,
+  "label": "Tender Management",
+  "links": [],
+  "modified": "2025-07-02 12:36:22.728852",
+  "module": null,
+  "name": "Tender Management",
+  "number_cards": [],
+  "parent_page": "",
+  "public": 1,
+  "quick_lists": [],
+  "restrict_to_domain": null,
+  "roles": [],
+  "sequence_id": 42.0,
+  "shortcuts": [
+   {
+    "color": "Grey",
+    "doc_view": "List",
+    "format": null,
+    "icon": null,
+    "kanban_board": null,
+    "label": "Tender AI",
+    "link_to": "Tender",
+    "parent": "Tender Management",
+    "parentfield": "shortcuts",
+    "parenttype": "Workspace",
+    "report_ref_doctype": null,
+    "restrict_to_domain": null,
+    "stats_filter": "[]",
+    "type": "DocType",
+    "url": null
+   }
+  ],
+  "title": "Tender Management"
  }
 ]

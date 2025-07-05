@@ -1,0 +1,35 @@
+// frappe.ui.form.on("Work Order Billing", {
+//     work_order_pdf: function(frm) {
+//         if (frm.doc.work_order_pdf) {
+//             frappe.call({
+//                 method: "security_agency.security_agency.doctype.work_order_billing.work_order_billing.extract_work_order_info",
+//                 args: { name: frm.doc.name },
+//                 callback: function(r) {
+//                     if (!r.exc) {
+//                         frappe.msgprint("✅ Work Order details extracted via AI.");
+//                         frm.reload_doc();
+//                     }
+//                 }
+//             });
+//         }
+//     },
+
+//     attendance_xls: function(frm) {
+//         if (frm.doc.attendance_xls) {
+//             frappe.call({
+//                 method: "security_agency.security_agency.doctype.work_order_billing.work_order_billing.parse_attendance_xlsx",
+//                 args: { name: frm.doc.name },
+//                 callback: function(r) {
+//                     if (!r.exc) {
+//                         frappe.msgprint("✅ Attendance processed and table populated.");
+//                         frm.reload_doc();
+//                     }
+//                 }
+//             });
+//         }
+//     },
+
+//     generate_invoice: function(frm) {
+//         frappe.msgprint("🧾 Go to Print → Draft Invoice format to print.");
+//     }
+// });

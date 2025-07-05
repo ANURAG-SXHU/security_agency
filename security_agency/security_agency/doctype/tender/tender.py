@@ -315,7 +315,12 @@ Scope:
 
 
 @frappe.whitelist()
+@frappe.whitelist()
 def run_manual_prompt(name):
+    import fitz  # PyMuPDF
+    import os
+    import requests
+    import tempfile
     from openai import OpenAIError  # ✅ lazy import
 
     doc = frappe.get_doc("Tender", name)
@@ -323,17 +328,51 @@ def run_manual_prompt(name):
     if not doc.manual_ai_prompt or not doc.manual_ai_prompt.strip():
         frappe.throw("Please write something in the Manual AI Prompt field.")
 
+    if not doc.tender_pdf:
+        frappe.throw("Please attach or link a Tender PDF.")
+
+    # Load PDF text
+    if doc.tender_pdf.startswith("http://") or doc.tender_pdf.startswith("https://"):
+        response = requests.get(doc.tender_pdf)
+        if response.status_code != 200:
+            frappe.throw("Failed to download the PDF from the provided URL.")
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+            tmp_file.write(response.content)
+            tmp_file_path = tmp_file.name
+        pdf_path = tmp_file_path
+    else:
+        pdf_path = frappe.get_site_path("public", doc.tender_pdf.replace("/files/", "files/"))
+
     try:
+        with fitz.open(pdf_path) as pdf:
+            text = "\n".join(page.get_text() for page in pdf)
+        
+        # Merge user prompt with tender text
+        full_prompt = f"""
+The following is a tender document. Use it to answer the user's prompt.
+
+--- Tender Document Content (Partial) ---
+{text[:6000]}
+
+--- User Prompt ---
+{doc.manual_ai_prompt}
+"""
+
         client = get_groq_client()
         response = client.chat.completions.create(
             model="llama3-70b-8192",
-            messages=[{"role": "user", "content": doc.manual_ai_prompt}]
+            messages=[{"role": "user", "content": full_prompt}]
         )
 
         result = response.choices[0].message.content
         doc.ai_response = result
         doc.save()
-        return "Manual prompt executed."
+        return "Manual prompt executed with PDF context."
 
     except OpenAIError as e:
         frappe.throw(f"Groq manual prompt failed: {e}")
+
+    finally:
+        if "tmp_file_path" in locals() and os.path.exists(tmp_file_path):
+            os.remove(tmp_file_path)
+
