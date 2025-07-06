@@ -1,23 +1,25 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:WOB-{MM}-{employee_name}-{#####}",
  "creation": "2025-07-02 22:36:56.868692",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "site_name",
   "upload_date",
+  "amount",
+  "guard_attendance_table",
+  "draft_invoice_pdf",
+  "final_invoice_pdf",
+  "comments",
+  "column_break_blln",
   "work_order_pdf",
   "payment_due_date",
   "rate_per_day",
   "attendance_xls",
   "total_present_days",
-  "amount",
-  "guard_attendance_table",
-  "generate_invoice",
-  "draft_invoice_pdf",
-  "final_invoice_pdf",
-  "comments"
+  "generate_invoice"
  ],
  "fields": [
   {
@@ -58,6 +60,7 @@
   {
    "fieldname": "guard_attendance_table",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Guard Attendance Table",
    "options": "Guard Attendance Entry"
   },
@@ -69,31 +72,39 @@
   {
    "fieldname": "draft_invoice_pdf",
    "fieldtype": "Attach",
+   "hidden": 1,
    "label": "Draft Invoice PDF"
   },
   {
    "fieldname": "final_invoice_pdf",
    "fieldtype": "Attach",
+   "hidden": 1,
    "label": "Final Invoice PDF"
   },
   {
    "fieldname": "comments",
    "fieldtype": "Text Editor",
+   "hidden": 1,
    "label": "Comments"
   },
   {
    "fieldname": "upload_date",
    "fieldtype": "Date",
    "label": "Upload Date"
+  },
+  {
+   "fieldname": "column_break_blln",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-02 23:16:07.300762",
+ "modified": "2025-07-05 17:13:54.962263",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Work Order Billing",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
