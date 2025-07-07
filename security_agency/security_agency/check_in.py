@@ -2,57 +2,57 @@ import frappe
 from frappe import _
 from frappe.utils import now_datetime
 
-@frappe.whitelist(allow_guest=True)
-def check_in(latitude=None, longitude=None):
+@frappe.whitelist(allow_guest=False)
+def check_in(latitude=None, longitude=None, user_email=None):
     """
-    API to create an 'Automatic Check In' record.
-    Uses the logged-in user (via API Key/Secret) to get the employee ID.
+    ✅ Check-in API:
+    Auth via API key (e.g., mobile.checkin@mtss.com),
+    But actual check-in is for user_email → employee.
     """
 
-    if not latitude or not longitude:
+    # Validation
+    if not latitude or not longitude or not user_email:
         return {
             "status": "error",
-            "message": "Latitude and Longitude are required"
+            "message": "Latitude, Longitude, and user_email are required"
         }
 
-    # ✅ Identify session user (should be API token user)
-    user = frappe.session.user
-    if user == "Guest":
+    # Ensure user_email is valid
+    if not frappe.db.exists("User", user_email):
         return {
             "status": "error",
-            "message": "Authentication required (use API Key/Secret)"
+            "message": f"User '{user_email}' does not exist"
         }
 
-    # ✅ Find linked Employee from session user
-    employee = frappe.db.get_value("Employee", {"user_id": user})
+    # Find Employee linked to user_email
+    employee = frappe.db.get_value("Employee", {"user_id": user_email})
     if not employee:
         return {
             "status": "error",
-            "message": f"No Employee linked to user {user}"
+            "message": f"No Employee found for user '{user_email}'"
         }
 
     try:
-        # ✅ Create Check-In record
-        doc = frappe.get_doc({
+        # Create Automatic Check In document
+        checkin = frappe.get_doc({
             "doctype": "Automatic Check In",
             "employee": employee,
             "latitude": latitude,
             "longitude": longitude,
-            "check_in_type": "Manual",
-            "check_in_time": now_datetime()
+            "checkin_time": now_datetime()
         })
-        doc.insert(ignore_permissions=True)
+        checkin.insert(ignore_permissions=True)
         frappe.db.commit()
 
         return {
             "status": "success",
             "message": f"Check-in recorded for {employee}",
             "employee": employee,
-            "docname": doc.name
+            "docname": checkin.name
         }
 
     except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "Check-In API Error")
+        frappe.log_error(frappe.get_traceback(), "Automatic Check In API Error")
         return {
             "status": "error",
             "message": str(e)
