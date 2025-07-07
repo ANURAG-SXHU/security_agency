@@ -1,30 +1,36 @@
 import frappe
-from frappe import _
 from frappe.utils import now_datetime
 
 @frappe.whitelist(allow_guest=False)
 def check_in(latitude=None, longitude=None, user_email=None):
     """
-    ✅ Check-in API:
+    ✅ Secure Check-in API
     Auth via API key (e.g., mobile.checkin@mtss.com),
-    But actual check-in is for user_email → employee.
+    Creates Check-in for user_email → employee.
     """
 
-    # Validation
+    # 🔐 Block unauthenticated users
+    if frappe.session.user == "Guest":
+        return {
+            "status": "error",
+            "message": "Authentication required. Use API Key/Secret"
+        }
+
+    # ✅ Validate input
     if not latitude or not longitude or not user_email:
         return {
             "status": "error",
             "message": "Latitude, Longitude, and user_email are required"
         }
 
-    # Ensure user_email is valid
+    # ✅ Ensure user exists
     if not frappe.db.exists("User", user_email):
         return {
             "status": "error",
             "message": f"User '{user_email}' does not exist"
         }
 
-    # Find Employee linked to user_email
+    # ✅ Find Employee linked to user_email
     employee = frappe.db.get_value("Employee", {"user_id": user_email})
     if not employee:
         return {
@@ -33,7 +39,7 @@ def check_in(latitude=None, longitude=None, user_email=None):
         }
 
     try:
-        # Create Automatic Check In document
+        # ✅ Create Check-In record
         checkin = frappe.get_doc({
             "doctype": "Automatic Check In",
             "employee": employee,
@@ -52,7 +58,7 @@ def check_in(latitude=None, longitude=None, user_email=None):
         }
 
     except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "Automatic Check In API Error")
+        frappe.log_error(frappe.get_traceback(), "Automatic Check-In API Error")
         return {
             "status": "error",
             "message": str(e)
