@@ -1,22 +1,15 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-07-02 22:39:10.225168",
+ "creation": "2025-07-08 13:06:02.646272",
  "doctype": "DocType",
+ "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "employee_name",
   "job_description",
-  "present_days",
-  "date"
+  "rate_per_day"
  ],
  "fields": [
-  {
-   "fieldname": "employee_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Employee Name"
-  },
   {
    "fieldname": "job_description",
    "fieldtype": "Data",
@@ -24,27 +17,20 @@
    "label": "Job Description"
   },
   {
-   "fieldname": "present_days",
-   "fieldtype": "Int",
+   "fieldname": "rate_per_day",
+   "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Present Days",
-   "options": "\n"
-  },
-  {
-   "fieldname": "date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Date"
+   "label": "Rate Per Day"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-07-08 20:06:35.941938",
+ "modified": "2025-07-08 13:06:48.622700",
  "modified_by": "Administrator",
  "module": "Security Agency",
- "name": "Guard Attendance Entry",
+ "name": "Job Rate Table",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

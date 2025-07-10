@@ -10,6 +10,7 @@
   "total_amount",
   "column_break_rmgf",
   "distribute_mode",
+  "site",
   "section_break_eugw",
   "deduction_table",
   "section_break_jpzt",
@@ -65,13 +66,19 @@
    "fieldtype": "Table",
    "label": "Deduction Table",
    "options": "Mess Deduction Detail"
+  },
+  {
+   "fieldname": "site",
+   "fieldtype": "Link",
+   "label": "Site",
+   "options": "Site"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-28 21:14:55.020647",
+ "modified": "2025-07-10 11:17:30.357106",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Mess Tracker",

@@ -20,6 +20,15 @@ app_license = "mit"
 # 		"has_permission": "security_agency.api.permission.has_app_permission"
 # 	}
 # ]
+app_include_js = [
+    "https://unpkg.com/leaflet@1.9.3/dist/leaflet.js",
+    "/assets/security_agency/js/planned_visit.js"
+]
+
+app_include_css = [
+    "https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+]
+
 fixtures = [
     {"doctype": "Workspace"},
     {"doctype": "Workflow"},
@@ -34,7 +43,8 @@ app_include_js = [
     "/assets/security_agency/js/logo_redirect.js",
     "/assets/security_agency/js/custom_loader.js",
     "/assets/security_agency/js/employee_group.js",
-    "/assets/security_agency/js/work_ob.js"
+    "/assets/security_agency/js/work_ob.js",
+    "/assets/security_agency/js/planned_visit.js"
     # "/assets/security_agency/js/custom_workspace.js",
     # "/assets/security_agency/js/role_based_ui.js"
 ]

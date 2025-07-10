@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "TEND-.{field:tender_title}-{YY}{MM}-{####}",
  "creation": "2025-06-29 11:23:19.157984",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -176,10 +177,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-29 13:12:44.492227",
+ "modified": "2025-07-10 11:54:03.502423",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Tender",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

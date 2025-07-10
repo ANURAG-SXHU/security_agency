@@ -1,167 +1,3 @@
-# # Copyright (c) 2025, Anurag Sahu and contributors
-# # For license information, please see license.txt
-
-# import frappe
-# from frappe.model.document import Document
-# import fitz  # PyMuPDF
-# import os
-# import requests
-# import tempfile
-# import re
-# from frappe.utils import today
-# from openai import OpenAI, OpenAIError
-
-
-# class Tender(Document):
-#     def before_save(self):
-#         if not self.upload_date:
-#             self.upload_date = today()
-
-
-# def get_groq_client():
-#     return OpenAI(
-#         api_key=frappe.conf.get("groq_api_key"),
-#         base_url="https://api.groq.com/openai/v1"
-#     )
-
-
-# @frappe.whitelist()
-# def extract_summary(name):
-#     doc = frappe.get_doc("Tender", name)
-
-#     if not doc.tender_pdf:
-#         frappe.throw("Please attach or link a Tender PDF.")
-
-#     # Handle file: remote or uploaded
-#     if doc.tender_pdf.startswith("http://") or doc.tender_pdf.startswith("https://"):
-#         response = requests.get(doc.tender_pdf)
-#         if response.status_code != 200:
-#             frappe.throw("Failed to download the PDF from the provided URL.")
-#         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
-#             tmp_file.write(response.content)
-#             tmp_file_path = tmp_file.name
-#         pdf_path = tmp_file_path
-#     else:
-#         pdf_path = frappe.get_site_path("public", doc.tender_pdf.replace("/files/", "files/"))
-
-#     with fitz.open(pdf_path) as pdf:
-#         text = "\n".join(page.get_text() for page in pdf)
-
-#     # Groq prompt
-#     prompt = f"""
-# From the following tender document, extract:
-# 1. Scope of Work
-# 2. Eligibility Criteria
-# 3. Required Documents
-# 4. Submission Date (YYYY-MM-DD format)
-# 5. EMD Deadline (YYYY-MM-DD format)
-# 6. Pre-bid Meeting Date (YYYY-MM-DD format)
-
-# Tender Text:
-# {text[:6000]}
-# """
-
-#     try:
-#         client = get_groq_client()
-#         response = client.chat.completions.create(
-#             model="llama3-70b-8192",
-#             messages=[{"role": "user", "content": prompt}]
-#         )
-
-#         result = response.choices[0].message.content
-
-#         # ✂️ Parse sections
-#         doc.scope_of_work = result.split("Eligibility")[0].strip()
-
-#         if "Eligibility" in result and "Required" in result:
-#             doc.eligibility_criteria = result.split("Eligibility")[1].split("Required")[0].strip()
-#             doc.required_documents = result.split("Required")[1].split("Submission Date")[0].strip()
-
-#         # 📅 Extract dates
-#         date_fields = {
-#             "submission_date": r"Submission Date\s*[:\-]?\s*(\d{4}-\d{2}-\d{2})",
-#             "emd_deadline": r"EMD Deadline\s*[:\-]?\s*(\d{4}-\d{2}-\d{2})",
-#             "pre_bid_date": r"Pre-bid Meeting Date\s*[:\-]?\s*(\d{4}-\d{2}-\d{2})"
-#         }
-
-#         for field, pattern in date_fields.items():
-#             match = re.search(pattern, result)
-#             if match:
-#                 setattr(doc, field, match.group(1))
-
-#         doc.save()
-
-#     except OpenAIError as e:
-#         frappe.throw(f"Groq API error: {e}")
-
-#     finally:
-#         if "tmp_file_path" in locals() and os.path.exists(tmp_file_path):
-#             os.remove(tmp_file_path)
-
-#     return "Summary and dates extracted successfully."
-
-
-# @frappe.whitelist()
-# def ask_ai_for_rate(name):
-#     doc = frappe.get_doc("Tender", name)
-
-#     if not doc.scope_summary or not doc.scope_summary.strip():
-#         frappe.throw("Please fill the Scope Summary before asking for rate.")
-
-#     prompt = f"""
-# Based on the following tender scope, suggest a bidding rate (in INR ₹ or Rs.) and provide cost justification.
-
-# Scope:
-# {doc.scope_summary}
-# """
-
-#     try:
-#         client = get_groq_client()
-#         response = client.chat.completions.create(
-#             model="llama3-70b-8192",
-#             messages=[{"role": "user", "content": prompt}]
-#         )
-
-#         result = response.choices[0].message.content
-#         doc.cost_justification = result
-
-#         # ₹ or Rs. extractor
-#         rate_match = re.search(r'(₹|Rs\.?)\s?([\d,]+)', result)
-#         if rate_match:
-#             clean_rate = rate_match.group(2).replace(",", "")
-#             doc.suggested_rate = float(clean_rate)
-
-#         doc.save()
-#         return "Rate suggestion saved."
-
-#     except OpenAIError as e:
-#         frappe.throw(f"Groq rate suggestion failed: {e}")
-
-
-# @frappe.whitelist()
-# def run_manual_prompt(name):
-#     doc = frappe.get_doc("Tender", name)
-
-#     if not doc.manual_ai_prompt or not doc.manual_ai_prompt.strip():
-#         frappe.throw("Please write something in the Manual AI Prompt field.")
-
-#     try:
-#         client = get_groq_client()
-#         response = client.chat.completions.create(
-#             model="llama3-70b-8192",
-#             messages=[{"role": "user", "content": doc.manual_ai_prompt}]
-#         )
-
-#         result = response.choices[0].message.content
-#         doc.ai_response = result
-#         doc.save()
-#         return "Manual prompt executed."
-
-#     except OpenAIError as e:
-#         frappe.throw(f"Groq manual prompt failed: {e}")
-# Copyright (c) 2025, Anurag Sahu and contributors
-# For license information, please see license.txt
-
 # Copyright (c) 2025, Anurag Sahu and contributors
 # For license information, please see license.txt
 
@@ -177,7 +13,7 @@ class Tender(Document):
 
 
 def get_groq_client():
-    from openai import OpenAI  # ✅ lazy import
+    from openai import OpenAI
     return OpenAI(
         api_key=frappe.conf.get("groq_api_key"),
         base_url="https://api.groq.com/openai/v1"
@@ -190,17 +26,16 @@ def extract_summary(name):
     import tempfile
     import os
     import json
-    import requests  # ✅ lazy import
-    import fitz  # ✅ lazy import
-    from dateutil import parser  # ✅ lazy import
-    from openai import OpenAIError  # ✅ lazy import
+    import requests
+    import fitz
+    from dateutil import parser
+    from openai import OpenAIError
 
     doc = frappe.get_doc("Tender", name)
 
     if not doc.tender_pdf:
         frappe.throw("Please attach or link a Tender PDF.")
 
-    # Remote or local
     if doc.tender_pdf.startswith("http://") or doc.tender_pdf.startswith("https://"):
         response = requests.get(doc.tender_pdf)
         if response.status_code != 200:
@@ -212,45 +47,54 @@ def extract_summary(name):
     else:
         pdf_path = frappe.get_site_path("public", doc.tender_pdf.replace("/files/", "files/"))
 
-    with fitz.open(pdf_path) as pdf:
-        text = "\n".join(page.get_text() for page in pdf)
+    try:
+        with fitz.open(pdf_path) as pdf:
+            text = "\n".join(page.get_text() for page in pdf)
 
-    # Prompt with JSON date output
-    prompt = f"""
-From the following tender document, extract:
+        prompt = f"""
+From the following tender document, extract and return the following in this format:
 
-1. Scope of Work
-2. Eligibility Criteria
-3. Required Documents
+📌 Scope of Work:
+<paragraph about the scope and timeline>
 
-Also, return the following dates in this exact JSON format:
+📌 Eligibility Criteria:
+- Bullet points listing eligibility rules, including JV conditions, turnover, etc.
+
+📌 Required Documents:
+- Bullet points listing required documents like PAN, GST, POA, JV Agreement, etc.
+
+At the end, return these dates in JSON format:
 {{
   "submission_date": "YYYY-MM-DD",
   "emd_deadline": "YYYY-MM-DD",
   "pre_bid_date": "YYYY-MM-DD"
 }}
 
-If a date is not found, use null.
+If a date is not found, return null.
 
 Tender Text:
 {text[:6000]}
 """
 
-    try:
         client = get_groq_client()
         response = client.chat.completions.create(
             model="llama3-70b-8192",
             messages=[{"role": "user", "content": prompt}]
         )
+
         result = response.choices[0].message.content
 
-        # Section parsing
-        doc.scope_of_work = result.split("Eligibility")[0].strip()
-        if "Eligibility" in result and "Required" in result:
-            doc.eligibility_criteria = result.split("Eligibility")[1].split("Required")[0].strip()
-            doc.required_documents = result.split("Required")[1].split("{")[0].strip()
+        # Clean & extract structured sections
+        def section_between(text, start, end):
+            if start in text and end in text:
+                return text.split(start)[1].split(end)[0].strip()
+            return ""
 
-        # Extract date JSON
+        doc.scope_of_work = section_between(result, "📌 Scope of Work:", "📌 Eligibility Criteria:")
+        doc.eligibility_criteria = section_between(result, "📌 Eligibility Criteria:", "📌 Required Documents:")
+        doc.required_documents = section_between(result, "📌 Required Documents:", "{")
+
+        # Extract JSON date block
         json_match = re.search(r'\{[\s\S]+?\}', result)
         if json_match:
             try:
@@ -278,7 +122,7 @@ Tender Text:
 @frappe.whitelist()
 def ask_ai_for_rate(name):
     import re
-    from openai import OpenAIError  # ✅ lazy import
+    from openai import OpenAIError
 
     doc = frappe.get_doc("Tender", name)
 
@@ -315,13 +159,12 @@ Scope:
 
 
 @frappe.whitelist()
-@frappe.whitelist()
 def run_manual_prompt(name):
-    import fitz  # PyMuPDF
+    import fitz
     import os
     import requests
     import tempfile
-    from openai import OpenAIError  # ✅ lazy import
+    from openai import OpenAIError
 
     doc = frappe.get_doc("Tender", name)
 
@@ -331,7 +174,6 @@ def run_manual_prompt(name):
     if not doc.tender_pdf:
         frappe.throw("Please attach or link a Tender PDF.")
 
-    # Load PDF text
     if doc.tender_pdf.startswith("http://") or doc.tender_pdf.startswith("https://"):
         response = requests.get(doc.tender_pdf)
         if response.status_code != 200:
@@ -346,8 +188,7 @@ def run_manual_prompt(name):
     try:
         with fitz.open(pdf_path) as pdf:
             text = "\n".join(page.get_text() for page in pdf)
-        
-        # Merge user prompt with tender text
+
         full_prompt = f"""
 The following is a tender document. Use it to answer the user's prompt.
 
@@ -375,4 +216,3 @@ The following is a tender document. Use it to answer the user's prompt.
     finally:
         if "tmp_file_path" in locals() and os.path.exists(tmp_file_path):
             os.remove(tmp_file_path)
-

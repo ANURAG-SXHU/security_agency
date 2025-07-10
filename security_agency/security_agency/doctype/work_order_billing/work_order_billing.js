@@ -33,3 +33,20 @@
 //         frappe.msgprint("🧾 Go to Print → Draft Invoice format to print.");
 //     }
 // });
+frappe.ui.form.on('Work Order Billing', {
+    refresh(frm) {
+        frm.add_custom_button("Download Attendance Template", () => {
+            frappe.call({
+                method: "security_agency.security_agency.doctype.work_order_billing.work_order_billing.download_attendance_template",
+                args: {
+                    docname: frm.doc.name
+                },
+                callback(r) {
+                    if (r.message) {
+                        window.open(r.message);
+                    }
+                }
+            });
+        });
+    }
+});
