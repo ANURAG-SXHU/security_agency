@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "ACI-.YYYY.-.##### ",
  "creation": "2025-07-06 11:17:11.774010",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -8,7 +9,8 @@
   "employee",
   "checkin_time",
   "latitude",
-  "longitude"
+  "longitude",
+  "map_view"
  ],
  "fields": [
   {
@@ -31,15 +33,21 @@
    "fieldname": "longitude",
    "fieldtype": "Data",
    "label": "longitude"
+  },
+  {
+   "fieldname": "map_view",
+   "fieldtype": "HTML",
+   "label": "Map"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-06 11:18:32.291888",
+ "modified": "2025-07-10 12:01:05.406566",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Automatic Check In",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
