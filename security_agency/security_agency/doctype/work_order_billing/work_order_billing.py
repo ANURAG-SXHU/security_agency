@@ -331,6 +331,7 @@
 
 #     frappe.msgprint(_("✅ Template generated successfully."))
 #     return f"/files/{filename}"
+
 import frappe
 from frappe.model.document import Document
 from frappe.utils import today, cstr
@@ -348,6 +349,46 @@ def get_groq_client():
         api_key=frappe.conf.get("groq_api_key"),
         base_url="https://api.groq.com/openai/v1"
     )
+
+# ------------------ PDF Compression ------------------
+
+def compress_pdf(input_path, output_path, scale_factor=0.5):
+    import fitz
+    pdf = fitz.open(input_path)
+    new_pdf = fitz.open()
+    for page in pdf:
+        pix = page.get_pixmap(matrix=fitz.Matrix(scale_factor, scale_factor))
+        img_pdf = fitz.open()
+        rect = fitz.Rect(0, 0, pix.width, pix.height)
+        img_page = img_pdf.new_page(width=pix.width, height=pix.height)
+        img_page.insert_image(rect, pixmap=pix)
+        new_pdf.insert_pdf(img_pdf)
+        img_pdf.close()
+    new_pdf.save(output_path)
+    new_pdf.close()
+    pdf.close()
+
+# ------------------ OCR.Space Fallback ------------------
+
+def ocr_with_ocrspace(pdf_path):
+    import requests, os
+    api_key = frappe.conf.get("ocrspace_api_key")
+    if not api_key:
+        frappe.throw("⚠️ Please configure 'ocrspace_api_key' in site config.")
+    if os.path.getsize(pdf_path) > 1024 * 1024:
+        frappe.throw("❌ PDF is too large for OCR.Space free plan (max 1 MB). Please compress it or upload a smaller file.")
+    with open(pdf_path, "rb") as f:
+        resp = requests.post(
+            "https://api.ocr.space/parse/image",
+            files={"file": f},
+            data={"apikey": api_key, "OCREngine": "2"}
+        )
+    data = resp.json()
+    if data.get("IsErroredOnProcessing"):
+        error = data.get("ErrorMessage") or data.get("ParsedResults", [{}])[0].get("ErrorMessage")
+        frappe.throw(f"❌ OCR.Space Error: {error}")
+    parsed = data.get("ParsedResults", [])
+    return "\n".join(p.get("ParsedText", "") for p in parsed)
 
 # ------------------ Extract Work Order Info ------------------
 
@@ -380,16 +421,28 @@ def extract_work_order_info(name):
         else:
             pdf_path = frappe.get_site_path("public", doc.work_order_pdf.replace("/files/", "files/"))
 
-        # Step 2: Extract text directly
+        # Step 2: Try direct text extraction
         with fitz.open(pdf_path) as pdf:
             text = "\n".join(page.get_text().strip() for page in pdf if page.get_text().strip())
 
+        # Step 3: If no text found, try OCR fallback
         if not text.strip():
-            frappe.throw("❌ Could not extract any text from the PDF.")
+            frappe.msgprint("🔍 No direct text found. Trying compression + OCR fallback...")
+
+            compressed_path = pdf_path.replace(".pdf", "_compressed.pdf")
+            compress_pdf(pdf_path, compressed_path)
+
+            if os.path.getsize(compressed_path) > 1024 * 1024:
+                frappe.throw("❌ PDF is still too large after compression. Please upload a smaller file.")
+
+            text = ocr_with_ocrspace(compressed_path)
+
+        if not text.strip():
+            frappe.throw("❌ Could not extract any text from the PDF (direct or OCR).")
 
         frappe.msgprint(f"📄 Text Preview:<br><pre>{text[:1500]}</pre>")
 
-        # Step 3: Try regex (fallback legacy)
+        # Step 4: Try regex fallback
         pattern = r"(?:Rate per man day|Rate per day|Rate\/day)[^\d]{0,10}(\d{2,5}(?:\.\d{1,2})?)"
         matches = re.findall(pattern, text, re.IGNORECASE)
         rates = [float(m) for m in matches if 100 <= float(m) <= 1000]
@@ -400,7 +453,7 @@ def extract_work_order_info(name):
             frappe.msgprint(f"✅ Regex fallback rate: ₹{max_rate}")
             return "✅ Rate extracted using regex."
 
-        # Step 4: Groq AI (multi-role rates)
+        # Step 5: Groq AI fallback
         prompt = f"""
 You're a quotation reader. Extract all job designations and their per-day rate.
 
