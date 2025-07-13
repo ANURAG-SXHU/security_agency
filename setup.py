@@ -18,5 +18,6 @@ setup(
         'requests>=2.31.0',
         'pandas>=2.0.0',
         'openpyxl>=3.1.0',
+        'python-dateutil>=2.8.0',
     ]
 )
