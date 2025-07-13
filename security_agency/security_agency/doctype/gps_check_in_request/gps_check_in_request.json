@@ -13,6 +13,7 @@
   "site",
   "status",
   "check_in_time",
+  "selfie_preview",
   "section_break_btbd",
   "longitude",
   "latitude",
@@ -116,13 +117,18 @@
    "fieldname": "upload_selfie",
    "fieldtype": "Attach Image",
    "label": "Upload Selfie"
+  },
+  {
+   "fieldname": "selfie_preview",
+   "fieldtype": "HTML",
+   "label": "Selfie Preview"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-10 11:15:16.431554",
+ "modified": "2025-07-13 22:56:38.915700",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "GPS Check-in Request",

@@ -244,6 +244,22 @@
 // For license information, please see license.txt
 
 frappe.require('/assets/security_agency/js/exif.js');
+frappe.ui.form.on('GPS Check-in Request', {
+    refresh: function (frm) {
+        if (frm.doc.upload_selfie) {
+            frm.fields_dict.selfie_preview.$wrapper.html(`
+                <img src="${frm.doc.upload_selfie}" style="max-width: 200px;">
+            `);
+        }
+    },
+    upload_selfie: function (frm) {
+        if (frm.doc.upload_selfie) {
+            frm.fields_dict.selfie_preview.$wrapper.html(`
+                <img src="${frm.doc.upload_selfie}" style="max-width: 200px;">
+            `);
+        }
+    }
+});
 
 frappe.ui.form.on("GPS Check-in Request", {
     onload(frm) {

@@ -7,6 +7,8 @@ from frappe.utils import today
 
 
 class Tender(Document):
+    def autoname(self):
+        self.name = frappe.model.naming.make_autoname('TEND-.YY.MM.####')
     def before_save(self):
         if not self.upload_date:
             self.upload_date = today()

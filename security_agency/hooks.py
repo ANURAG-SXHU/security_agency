@@ -56,7 +56,7 @@ app_include_css = [
 ]
 
 web_include_css = [
-    "/assets/security_agency/css/custom_home.css"
+    # "/assets/security_agency/css/custom_home.css"
 ]
 scheduler_events = {
     "daily": [
