@@ -60,7 +60,8 @@ web_include_css = [
 ]
 scheduler_events = {
     "daily": [
-        "security_agency.security_agency.Tender_reminder.send_tender_reminders"
+        "security_agency.security_agency.Tender_reminder.send_tender_reminders",
+        "security_agency.security_agency.attendance_anomaly.execute"
     ]
 }
 

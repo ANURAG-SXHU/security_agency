@@ -49,8 +49,7 @@
   {
    "fieldname": "check_in_time",
    "fieldtype": "Datetime",
-   "label": "Check in Time",
-   "read_only": 1
+   "label": "Check in Time"
   },
   {
    "fieldname": "latitude",
@@ -128,7 +127,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-13 22:56:38.915700",
+ "modified": "2025-07-15 09:29:42.130867",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "GPS Check-in Request",
