@@ -76,9 +76,11 @@ doc_events = {
             "security_agency.security_agency.custom_hooks.joining_fee_deduction",
             "security_agency.security_agency.custom_hooks.advance_request_deduction",
             "security_agency.security_agency.custom_hooks.mess_deduction"
-        ]
+        ],
+        "on_submit": "security_agency.security_agency.api.whatsapp.send_salary_slip_pdf_on_whatsapp"
     }
 }
+
 
 # fixed some errror
 
