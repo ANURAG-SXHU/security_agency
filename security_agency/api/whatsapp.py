@@ -90,7 +90,7 @@ def send_salary_slip_pdf_on_whatsapp(doc, method=None):
         print(f"[WhatsApp] 📱 Sending to: {whatsapp_number}")
 
         # Generate HTML from custom Print Format
-        html = frappe.get_print(doc.doctype, doc.name, print_format="MTSS SALARY SLIP")
+        html = frappe.get_print(doc.doctype, doc.name, print_format="TEST")
         
         # Convert HTML to PDF
         pdf_data = get_pdf(html)
