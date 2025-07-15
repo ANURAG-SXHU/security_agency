@@ -77,7 +77,6 @@
 #         print(f"[WhatsApp] ❌ Exception occurred:\n{frappe.get_traceback()}")
 import frappe
 import requests
-from frappe.utils.pdf import get_pdf
 from frappe.utils.file_manager import save_file
 from frappe.utils import get_url
 from datetime import datetime
@@ -85,55 +84,57 @@ from datetime import datetime
 def send_salary_slip_pdf_on_whatsapp(doc, method=None):
     """
     Hook function to send a generated Salary Slip PDF to employee via WhatsApp using UltraMsg API.
+    Uses the PDF generator configured in the Print Format (chrome).
     """
     try:
-        frappe.logger().info(f"[WhatsApp] 📌 Hook triggered for Salary Slip: {doc.name}")
+        print(f"[WhatsApp] 📌 Hook triggered for Salary Slip: {doc.name}")
 
-        # Get employee document
+        # Get the Employee record
         employee = frappe.get_doc("Employee", doc.employee)
-        frappe.logger().info(f"[WhatsApp] ✅ Found employee: {employee.name}")
+        print(f"[WhatsApp] ✅ Found employee: {employee.name}")
 
         # Validate WhatsApp number
         whatsapp_number = employee.get("custom_whatsapp_number")
         if not whatsapp_number:
-            frappe.logger().info(f"[WhatsApp] ❌ No WhatsApp number found for {employee.name}")
+            print(f"[WhatsApp] ❌ No WhatsApp number found for {employee.name}")
             return
 
-        frappe.logger().info(f"[WhatsApp] 📱 Sending to: {whatsapp_number}")
+        print(f"[WhatsApp] 📱 Will send to: {whatsapp_number}")
 
-        # Generate HTML from custom Print Format
-        html = frappe.get_print(doc.doctype, doc.name, print_format="Test")
+        # Generate PDF directly using Print Format's PDF generator (chrome)
+        pdf_data = frappe.get_print(
+            doc.doctype,
+            doc.name,
+            print_format="Test",
+            as_pdf=True,
+            no_letterhead=1  # Optional: same as your download_pdf URL
+        )
+        sanitized_filename = doc.name.replace("/", "-") + ".pdf"
+        print(f"[WhatsApp] 🧾 PDF generated: {sanitized_filename}")
 
-        # Convert HTML to PDF using Chrome explicitly
-        pdf_data = get_pdf(html, pdf_generator="chrome")
-        sanitized_filename = f"{doc.name.replace('/', '-')}.pdf"
-        frappe.logger().info(f"[WhatsApp] 🧾 PDF generated: {sanitized_filename}")
-
-        # Save the file in public path
+        # Save the PDF file publicly
         _file = save_file(
             fname=sanitized_filename,
             content=pdf_data,
             dt=doc.doctype,
             dn=doc.name,
-            is_private=0
+            is_private=0  # public URL
         )
         file_url = get_url(_file.file_url)
-        frappe.logger().info(f"[WhatsApp] 📂 File saved at: {file_url}")
+        print(f"[WhatsApp] 📂 PDF saved at: {file_url}")
 
-        # Extract month and year from start_date
-        start_month = "Unknown"
-        year = "Unknown"
-        if doc.start_date:
-            try:
-                start_date = frappe.utils.getdate(doc.start_date)
-                start_month = start_date.strftime("%B")
-                year = start_date.strftime("%Y")
-            except Exception:
-                pass
+        # Extract month and year from start_date if available
+        try:
+            start_date = frappe.utils.getdate(doc.start_date)
+            start_month = start_date.strftime("%B")
+            year = start_date.strftime("%Y")
+        except Exception:
+            start_month = "Unknown"
+            year = "Unknown"
 
-        # WhatsApp API (UltraMsg)
-        instance_id = frappe.conf.ultramsg_instance_id or "instance132549"
-        token = frappe.conf.ultramsg_token or "2ixk8g8b41f9jp1v"
+        # Prepare WhatsApp API payload
+        instance_id = "instance132549"
+        token = "2ixk8g8b41f9jp1v"
         api_url = f"https://api.ultramsg.com/{instance_id}/messages/document"
 
         payload = {
@@ -144,16 +145,13 @@ def send_salary_slip_pdf_on_whatsapp(doc, method=None):
             "caption": f"Hello {employee.employee_name}, your Salary Slip for {start_month}-{year} is attached."
         }
 
-        frappe.logger().info(f"[WhatsApp] 📤 Sending payload to UltraMsg...")
-
-        response = requests.post(api_url, data=payload, timeout=30)
+        print(f"[WhatsApp] 📤 Sending to UltraMsg...")
+        response = requests.post(api_url, data=payload)
 
         if response.status_code == 200:
-            frappe.logger().info(f"[WhatsApp] ✅ Sent successfully: {response.text}")
+            print(f"[WhatsApp] ✅ Sent successfully: {response.text}")
         else:
-            frappe.log_error(f"UltraMsg send failed: {response.status_code} - {response.text}")
-            frappe.logger().info(f"[WhatsApp] ⚠️ Failed to send: {response.status_code} - {response.text}")
+            print(f"[WhatsApp] ⚠️ Failed to send: {response.status_code} - {response.text}")
 
     except Exception:
-        frappe.log_error(frappe.get_traceback(), "WhatsApp Salary Slip Hook Error")
-        frappe.logger().info(f"[WhatsApp] ❌ Exception occurred:\n{frappe.get_traceback()}")
+        print(f"[WhatsApp] ❌ Exception occurred:\n{frappe.get_traceback()}")
