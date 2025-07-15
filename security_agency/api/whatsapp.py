@@ -87,27 +87,27 @@ def send_salary_slip_pdf_on_whatsapp(doc, method=None):
     Hook function to send a generated Salary Slip PDF to employee via WhatsApp using UltraMsg API.
     """
     try:
-        print(f"[WhatsApp] 📌 Hook triggered for Salary Slip: {doc.name}")
+        frappe.logger().info(f"[WhatsApp] 📌 Hook triggered for Salary Slip: {doc.name}")
 
         # Get employee document
         employee = frappe.get_doc("Employee", doc.employee)
-        print(f"[WhatsApp] ✅ Found employee: {employee.name}")
+        frappe.logger().info(f"[WhatsApp] ✅ Found employee: {employee.name}")
 
         # Validate WhatsApp number
         whatsapp_number = employee.get("custom_whatsapp_number")
         if not whatsapp_number:
-            print(f"[WhatsApp] ❌ No WhatsApp number found for {employee.name}")
+            frappe.logger().info(f"[WhatsApp] ❌ No WhatsApp number found for {employee.name}")
             return
 
-        print(f"[WhatsApp] 📱 Sending to: {whatsapp_number}")
+        frappe.logger().info(f"[WhatsApp] 📱 Sending to: {whatsapp_number}")
 
         # Generate HTML from custom Print Format
         html = frappe.get_print(doc.doctype, doc.name, print_format="Test")
-        
-        # Convert HTML to PDF
-        pdf_data = get_pdf(html)
-        sanitized_filename = doc.name.replace("/", "-") + ".pdf"
-        print(f"[WhatsApp] 🧾 PDF generated: {sanitized_filename}")
+
+        # Convert HTML to PDF using Chrome explicitly
+        pdf_data = get_pdf(html, pdf_generator="chrome")
+        sanitized_filename = f"{doc.name.replace('/', '-')}.pdf"
+        frappe.logger().info(f"[WhatsApp] 🧾 PDF generated: {sanitized_filename}")
 
         # Save the file in public path
         _file = save_file(
@@ -118,20 +118,22 @@ def send_salary_slip_pdf_on_whatsapp(doc, method=None):
             is_private=0
         )
         file_url = get_url(_file.file_url)
-        print(f"[WhatsApp] 📂 File saved at: {file_url}")
+        frappe.logger().info(f"[WhatsApp] 📂 File saved at: {file_url}")
 
         # Extract month and year from start_date
-        try:
-            start_date = frappe.utils.getdate(doc.start_date)
-            start_month = start_date.strftime("%B")
-            year = start_date.strftime("%Y")
-        except Exception:
-            start_month = "Unknown"
-            year = "Unknown"
+        start_month = "Unknown"
+        year = "Unknown"
+        if doc.start_date:
+            try:
+                start_date = frappe.utils.getdate(doc.start_date)
+                start_month = start_date.strftime("%B")
+                year = start_date.strftime("%Y")
+            except Exception:
+                pass
 
         # WhatsApp API (UltraMsg)
-        instance_id = "instance132549"
-        token = "2ixk8g8b41f9jp1v"
+        instance_id = frappe.conf.ultramsg_instance_id or "instance132549"
+        token = frappe.conf.ultramsg_token or "2ixk8g8b41f9jp1v"
         api_url = f"https://api.ultramsg.com/{instance_id}/messages/document"
 
         payload = {
@@ -142,13 +144,16 @@ def send_salary_slip_pdf_on_whatsapp(doc, method=None):
             "caption": f"Hello {employee.employee_name}, your Salary Slip for {start_month}-{year} is attached."
         }
 
-        print(f"[WhatsApp] 📤 Sending payload to UltraMsg...")
-        response = requests.post(api_url, data=payload)
+        frappe.logger().info(f"[WhatsApp] 📤 Sending payload to UltraMsg...")
+
+        response = requests.post(api_url, data=payload, timeout=30)
 
         if response.status_code == 200:
-            print(f"[WhatsApp] ✅ Sent successfully: {response.text}")
+            frappe.logger().info(f"[WhatsApp] ✅ Sent successfully: {response.text}")
         else:
-            print(f"[WhatsApp] ⚠️ Failed to send: {response.status_code} - {response.text}")
+            frappe.log_error(f"UltraMsg send failed: {response.status_code} - {response.text}")
+            frappe.logger().info(f"[WhatsApp] ⚠️ Failed to send: {response.status_code} - {response.text}")
 
     except Exception:
-        print(f"[WhatsApp] ❌ Exception occurred:\n{frappe.get_traceback()}")
+        frappe.log_error(frappe.get_traceback(), "WhatsApp Salary Slip Hook Error")
+        frappe.logger().info(f"[WhatsApp] ❌ Exception occurred:\n{frappe.get_traceback()}")
