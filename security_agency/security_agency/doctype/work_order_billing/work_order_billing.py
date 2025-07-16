@@ -223,88 +223,6 @@
 # #     except Exception as e:
 # #         frappe.log_error(str(e), "Attendance XLS Parse Error")
 # #         frappe.throw("⚠️ Error parsing attendance XLS.")
-# @frappe.whitelist()
-# def parse_attendance_xlsx(name):
-#     import pandas as pd
-#     from frappe.utils import cstr, today
-
-#     frappe.msgprint(f"⚙️ Parsing attendance for: {name}")
-#     doc = frappe.get_doc("Work Order Billing", name)
-
-#     if not doc.attendance_xls:
-#         frappe.throw("Please upload Attendance XLS file.")
-
-#     try:
-#         file_path = frappe.get_site_path("public", doc.attendance_xls.replace("/files/", "files/"))
-#         frappe.msgprint(f"📁 Resolved file path: {file_path}")
-
-#         df = pd.read_excel(file_path, engine='openpyxl')
-#         frappe.msgprint(f"📊 Loaded columns: {list(df.columns)}")
-
-#         required_columns = {"Employee Name", "Status", "Job Description", "Date"}
-#         if not required_columns.issubset(df.columns):
-#             frappe.throw("❌ Required columns missing. Make sure Excel has: 'Employee Name', 'Status', 'Job Description', and 'Date'.")
-
-#         # Step 1: Group by (employee, job, date)
-#         attendance_map = {}  # { (employee_name, job_description, date): count }
-#         for _, row in df.iterrows():
-#             emp = cstr(row.get("Employee Name", "")).strip()
-#             status = cstr(row.get("Status", "")).strip().lower()
-#             job = cstr(row.get("Job Description", "")).strip()
-#             date = row.get("Date")
-
-#             if emp and job and date and status == "present":
-#                 key = (emp, job, date)
-#                 attendance_map[key] = attendance_map.get(key, 0) + 1
-
-#         # Step 2: Build job rate lookup
-#         rate_lookup = {
-#             row.job_description.strip(): row.rate_per_day
-#             for row in doc.job_rate_details or []
-#         }
-
-#         # Step 3: Clear existing table
-#         doc.set("guard_attendance_table", [])
-
-#         total_days = 0
-#         total_amount = 0.0
-
-#         # Step 4: Append attendance entries
-#         for (emp, job, att_date), days in attendance_map.items():
-#             raw_rate = rate_lookup.get(job)
-#             try:
-#                 rate = float(raw_rate)
-#                 if pd.isna(rate):
-#                     raise ValueError("Rate is NaN")
-#             except:
-#                 frappe.msgprint(f"⚠️ No valid rate found for job '{job}'. Using ₹0.")
-#                 rate = 0.0
-
-#             amount = rate * days
-#             total_days += days
-#             total_amount += amount
-
-#             # Log for verification
-#             frappe.msgprint(f"🧾 {emp} | {job} | {att_date} | {days} × ₹{rate} = ₹{amount}")
-
-#             doc.append("guard_attendance_table", {
-#                 "employee_name": emp or "",
-#                 "job_description": job or "",
-#                 "present_days": int(days),
-#                 "date": att_date or today()
-#             })
-
-#         doc.total_present_days = total_days
-#         doc.amount = total_amount
-
-#         frappe.msgprint(f"✅ Total Present Days: {total_days}<br>💰 Total Amount: ₹{total_amount:.2f}")
-#         doc.save()
-
-#         return f"✅ Parsed {len(attendance_map)} entries. Total Days: {total_days}, Total Amount: ₹{total_amount:.2f}"
-
-#     except Exception as e:
-#         frappe.log_error(str(e), "Attendance XLS Parse Error")
-#         frappe.throw("⚠️ Error parsing attendance XLS.")
 
 
 
@@ -511,3 +429,86 @@ def download_attendance_template(docname=None):
 
     frappe.msgprint(_("✅ Template generated successfully."))
     return f"/files/{filename}"
+
+@frappe.whitelist()
+def parse_attendance_xlsx(name):
+    import pandas as pd
+    from frappe.utils import cstr, today
+
+    frappe.msgprint(f"⚙️ Parsing attendance for: {name}")
+    doc = frappe.get_doc("Work Order Billing", name)
+
+    if not doc.attendance_xls:
+        frappe.throw("Please upload Attendance XLS file.")
+
+    try:
+        file_path = frappe.get_site_path("public", doc.attendance_xls.replace("/files/", "files/"))
+        frappe.msgprint(f"📁 Resolved file path: {file_path}")
+
+        df = pd.read_excel(file_path, engine='openpyxl')
+        frappe.msgprint(f"📊 Loaded columns: {list(df.columns)}")
+
+        required_columns = {"Employee Name", "Status", "Job Description", "Date"}
+        if not required_columns.issubset(df.columns):
+            frappe.throw("❌ Required columns missing. Make sure Excel has: 'Employee Name', 'Status', 'Job Description', and 'Date'.")
+
+        # Step 1: Group by (employee, job, date)
+        attendance_map = {}  # { (employee_name, job_description, date): count }
+        for _, row in df.iterrows():
+            emp = cstr(row.get("Employee Name", "")).strip()
+            status = cstr(row.get("Status", "")).strip().lower()
+            job = cstr(row.get("Job Description", "")).strip()
+            date = row.get("Date")
+
+            if emp and job and date and status == "present":
+                key = (emp, job, date)
+                attendance_map[key] = attendance_map.get(key, 0) + 1
+
+        # Step 2: Build job rate lookup
+        rate_lookup = {
+            row.job_description.strip(): row.rate_per_day
+            for row in doc.job_rate_details or []
+        }
+
+        # Step 3: Clear existing table
+        doc.set("guard_attendance_table", [])
+
+        total_days = 0
+        total_amount = 0.0
+
+        # Step 4: Append attendance entries
+        for (emp, job, att_date), days in attendance_map.items():
+            raw_rate = rate_lookup.get(job)
+            try:
+                rate = float(raw_rate)
+                if pd.isna(rate):
+                    raise ValueError("Rate is NaN")
+            except:
+                frappe.msgprint(f"⚠️ No valid rate found for job '{job}'. Using ₹0.")
+                rate = 0.0
+
+            amount = rate * days
+            total_days += days
+            total_amount += amount
+
+            # Log for verification
+            frappe.msgprint(f"🧾 {emp} | {job} | {att_date} | {days} × ₹{rate} = ₹{amount}")
+
+            doc.append("guard_attendance_table", {
+                "employee_name": emp or "",
+                "job_description": job or "",
+                "present_days": int(days),
+                "date": att_date or today()
+            })
+
+        doc.total_present_days = total_days
+        doc.amount = total_amount
+
+        frappe.msgprint(f"✅ Total Present Days: {total_days}<br>💰 Total Amount: ₹{total_amount:.2f}")
+        doc.save()
+
+        return f"✅ Parsed {len(attendance_map)} entries. Total Days: {total_days}, Total Amount: ₹{total_amount:.2f}"
+
+    except Exception as e:
+        frappe.log_error(str(e), "Attendance XLS Parse Error")
+        frappe.throw("⚠️ Error parsing attendance XLS.")
