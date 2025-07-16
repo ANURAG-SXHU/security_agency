@@ -75,3 +75,4 @@ def send_salary_slip_pdf_on_whatsapp(doc, method=None):
 
     except Exception:
         print(f"[WhatsApp] ❌ Exception occurred:\n{frappe.get_traceback()}")
+# api
