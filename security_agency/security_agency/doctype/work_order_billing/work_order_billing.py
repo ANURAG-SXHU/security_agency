@@ -306,31 +306,7 @@
 #         frappe.log_error(str(e), "Attendance XLS Parse Error")
 #         frappe.throw("⚠️ Error parsing attendance XLS.")
 
-# @frappe.whitelist()
-# def download_attendance_template(docname=None):
-#     import pandas as pd
-#     import os
-#     from frappe.utils import get_site_path
-#     from datetime import date
-#     from frappe import _
 
-#     # Sample DataFrame
-#     df = pd.DataFrame([{
-#         "Employee Name": "Ramesh Kumar",
-#         "Job Description": "Security Guard",
-#         "Status": "Present",
-#         "Date": date.today().strftime("%Y-%m-%d")
-#     }])
-
-#     # File path
-#     filename = f"Attendance_Template_{docname or 'template'}.xlsx"
-#     file_path = os.path.join(get_site_path("public", "files"), filename)
-
-#     # Save to file
-#     df.to_excel(file_path, index=False)
-
-#     frappe.msgprint(_("✅ Template generated successfully."))
-#     return f"/files/{filename}"
 
 import frappe
 from frappe.model.document import Document
@@ -507,3 +483,31 @@ If rate is monthly/hourly, convert to per-day (26 working days/month, 8 hrs/day)
     finally:
         if "pdf_path" in locals() and os.path.exists(pdf_path):
             os.remove(pdf_path)
+
+
+
+@frappe.whitelist()
+def download_attendance_template(docname=None):
+    import pandas as pd
+    import os
+    from frappe.utils import get_site_path
+    from datetime import date
+    from frappe import _
+
+    # Sample DataFrame
+    df = pd.DataFrame([{
+        "Employee Name": "Ramesh Kumar",
+        "Job Description": "Security Guard",
+        "Status": "Present",
+        "Date": date.today().strftime("%Y-%m-%d")
+    }])
+
+    # File path
+    filename = f"Attendance_Template_{docname or 'template'}.xlsx"
+    file_path = os.path.join(get_site_path("public", "files"), filename)
+
+    # Save to file
+    df.to_excel(file_path, index=False)
+
+    frappe.msgprint(_("✅ Template generated successfully."))
+    return f"/files/{filename}"
