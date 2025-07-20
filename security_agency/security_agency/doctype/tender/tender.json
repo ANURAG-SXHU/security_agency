@@ -15,12 +15,7 @@
   "scope_of_work",
   "required_documents",
   "eligibility_criteria",
-  "section_break_movc",
-  "scope_summary",
-  "ask_ai_for_rate",
-  "section_break_stba",
-  "cost_justification",
-  "suggested_rate",
+  "important_dates",
   "section_break_mdse",
   "submission_date",
   "emd_deadline",
@@ -29,6 +24,11 @@
   "emd_reminded",
   "pre_bid_reminded",
   "submission_reminded",
+  "scope_summery_tab",
+  "scope_summary",
+  "ask_ai_for_rate",
+  "cost_justification",
+  "suggested_rate",
   "tab_2_tab",
   "manual_ai_prompt",
   "run_prompt",
@@ -71,7 +71,7 @@
   },
   {
    "fieldname": "scope_summary",
-   "fieldtype": "Data",
+   "fieldtype": "Long Text",
    "label": "Scope Summary"
   },
   {
@@ -81,7 +81,7 @@
   },
   {
    "fieldname": "cost_justification",
-   "fieldtype": "Text Editor",
+   "fieldtype": "Long Text",
    "label": "Cost Justification"
   },
   {
@@ -139,7 +139,7 @@
   {
    "fieldname": "ask_ai_for_rate",
    "fieldtype": "Button",
-   "label": "Ask AI for Rate"
+   "label": "Ask Ai For Rate"
   },
   {
    "fieldname": "manual_ai_prompt",
@@ -165,18 +165,20 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "section_break_movc",
-   "fieldtype": "Section Break"
+   "fieldname": "scope_summery_tab",
+   "fieldtype": "Tab Break",
+   "label": "Scope Summery"
   },
   {
-   "fieldname": "section_break_stba",
-   "fieldtype": "Section Break"
+   "fieldname": "important_dates",
+   "fieldtype": "Long Text",
+   "label": "Important Dates"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-13 22:53:20.226344",
+ "modified": "2025-07-20 18:34:54.562446",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Tender",

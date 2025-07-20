@@ -46,3 +46,8 @@ frappe.ui.form.on("Tender", {
         });
     }
 });
+frappe.realtime.on('textract_progress', (data) => {
+  console.log(data.status);
+  // Show in your UI:
+  frappe.show_alert({message: data.status, indicator: 'blue'});
+});
