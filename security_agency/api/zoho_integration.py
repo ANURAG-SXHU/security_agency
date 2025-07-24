@@ -379,6 +379,67 @@ def my_auth_callback(code=None):
 
 
 @frappe.whitelist()
+# def push_invoice_to_zoho(name):
+#     """Push Work Order Billing invoice to Zoho Books"""
+#     doc = frappe.get_doc("Work Order Billing", name)
+
+#     zoho_customer_id = frappe.db.get_value(
+#         "Zoho Customer",
+#         doc.zoho_customer,
+#         "zoho_customer_id"
+#     )
+#     if not zoho_customer_id:
+#         frappe.throw("No Zoho Customer linked!")
+
+#     line_items = []
+#     for row in doc.invoice_lines:
+#         line_items.append({
+#             "name": row.description,
+#             "rate": row.rate,
+#             "quantity": row.quantity
+#         })
+
+#     payload = {
+#         "customer_id": zoho_customer_id,
+#         "line_items": line_items
+#     }
+
+#     settings = get_zoho_settings()
+#     access_token = get_access_token()
+#     org_id = settings.org_id
+
+#     if not org_id:
+#         frappe.throw("Zoho Settings missing Org ID!")
+
+#     headers = {
+#         "Authorization": f"Zoho-oauthtoken {access_token}"
+#     }
+
+#     url = f"https://books.zoho.in/api/v3/invoices?organization_id={org_id}"
+
+#     res = requests.post(url, headers=headers, json=payload)
+
+#     # 🗝️ Refresh & retry if needed
+#     if res.status_code == 401:
+#         access_token = refresh_access_token()
+#         headers["Authorization"] = f"Zoho-oauthtoken {access_token}"
+#         res = requests.post(url, headers=headers, json=payload)
+
+#     res.raise_for_status()
+#     data = res.json()
+
+#     if data.get("code") != 0:
+#         frappe.throw(f"Zoho Error: {data}")
+
+#     invoice_id = data["invoice"]["invoice_id"]
+#     pdf_url = data["invoice"]["pdf_url"]
+
+#     doc.zoho_invoice_id = invoice_id
+#     doc.zoho_invoice_pdf_url = pdf_url
+#     doc.save()
+
+#     return f"✅ Pushed to Zoho Books! Invoice ID: {invoice_id}"
+@frappe.whitelist()
 def push_invoice_to_zoho(name):
     """Push Work Order Billing invoice to Zoho Books"""
     doc = frappe.get_doc("Work Order Billing", name)
@@ -395,21 +456,21 @@ def push_invoice_to_zoho(name):
     for row in doc.invoice_lines:
         line_items.append({
             "name": row.description,
+            "description": row.description,
             "rate": row.rate,
             "quantity": row.quantity
         })
 
     payload = {
-        "customer_id": zoho_customer_id,
-        "line_items": line_items
+        "invoice": {
+            "customer_id": zoho_customer_id,
+            "line_items": line_items
+        }
     }
 
     settings = get_zoho_settings()
     access_token = get_access_token()
     org_id = settings.org_id
-
-    if not org_id:
-        frappe.throw("Zoho Settings missing Org ID!")
 
     headers = {
         "Authorization": f"Zoho-oauthtoken {access_token}"
@@ -419,7 +480,6 @@ def push_invoice_to_zoho(name):
 
     res = requests.post(url, headers=headers, json=payload)
 
-    # 🗝️ Refresh & retry if needed
     if res.status_code == 401:
         access_token = refresh_access_token()
         headers["Authorization"] = f"Zoho-oauthtoken {access_token}"
