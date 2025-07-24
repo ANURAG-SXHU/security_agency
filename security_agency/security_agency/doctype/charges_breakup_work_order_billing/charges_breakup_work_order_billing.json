@@ -1,0 +1,81 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-21 23:10:40.113347",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "job_description",
+  "total_days",
+  "leave_wages",
+  "national_and_festival_holidays",
+  "epf",
+  "esic",
+  "reliver_charges",
+  "service_charges"
+ ],
+ "fields": [
+  {
+   "fieldname": "leave_wages",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Leave Days"
+  },
+  {
+   "fieldname": "national_and_festival_holidays",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "National And Festival Holidays"
+  },
+  {
+   "fieldname": "epf",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "EPF%"
+  },
+  {
+   "fieldname": "esic",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "ESIC%"
+  },
+  {
+   "fieldname": "reliver_charges",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Reliver Charges%"
+  },
+  {
+   "fieldname": "service_charges",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Service Charges%"
+  },
+  {
+   "fieldname": "job_description",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Job Description"
+  },
+  {
+   "fieldname": "total_days",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Total Days"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-22 14:43:18.596665",
+ "modified_by": "Administrator",
+ "module": "Security Agency",
+ "name": "Charges Breakup Work Order Billing",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

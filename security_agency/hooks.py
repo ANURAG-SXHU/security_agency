@@ -62,6 +62,10 @@ scheduler_events = {
     "daily": [
         "security_agency.security_agency.Tender_reminder.send_tender_reminders",
         "security_agency.security_agency.attendance_anomaly.execute"
+    ],
+    "hourly": [
+        "security_agency.api.zoho_integration.refresh_access_token",
+        "security_agency.api.zoho_integration.fetch_and_save_zoho_customers"
     ]
 }
 
@@ -110,6 +114,10 @@ has_permission = {
     "Employee": "security_agency.security_agency.doctype.check_in_request_gps.check_in_request_gps.has_employee_permission",
     "Attendance": "security_agency.security_agency.doctype.check_in_request_gps.check_in_request_gps.has_attendance_permission"
 }
+override_whitelisted_methods = {
+    "security_agency.auth_callback": "security_agency.api.zoho.auth_callback"
+}
+
 
 
 

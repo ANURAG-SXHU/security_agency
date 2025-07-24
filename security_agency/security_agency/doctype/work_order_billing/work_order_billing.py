@@ -1,418 +1,337 @@
-# import frappe
-# from frappe.model.document import Document
-# from frappe.utils import today, cstr
-
-# class WorkOrderBilling(Document):
-#     def before_save(self):
-#         if not self.upload_date:
-#             self.upload_date = today()
-#         # if self.rate_per_day and self.total_present_days:
-#         #     self.amount = float(self.rate_per_day) * int(self.total_present_days)
-
-# # ------------------ Groq Client ------------------
-
-# def get_groq_client():
-#     from openai import OpenAI
-#     return OpenAI(
-#         api_key=frappe.conf.get("groq_api_key"),
-#         base_url="https://api.groq.com/openai/v1"
-#     )
-
-# # ------------------ Fast OCR (Page 1, DPI 100) ------------------
-
-# def extract_text_with_ocr(pdf_path):
-#     import fitz
-#     from PIL import Image
-#     import pytesseract
-#     import time
-
-#     with fitz.open(pdf_path) as doc:
-#         first_page_text = doc[0].get_text().strip()
-#         if first_page_text:
-#             return first_page_text
-
-#         frappe.msgprint("📃 No extractable text. Running fast OCR on Page 1...")
-#         start = time.time()
-#         pix = doc[0].get_pixmap(dpi=100)
-#         img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-#         text = pytesseract.image_to_string(img)
-#         elapsed = round(time.time() - start, 2)
-#         frappe.msgprint(f"🧠 OCR Page 1 took {elapsed} sec")
-#         return text
-
-# # ------------------ Extract Work Order Info ------------------
-
-# @frappe.whitelist()
-# def extract_work_order_info(name):
-#     import os
-#     import tempfile
-#     import re
-#     import json
-#     import requests
-#     import fitz
-#     import time
-#     from openai import OpenAIError
-
-#     frappe.msgprint(f"⚙️ Extracting info for: {name}")
-#     doc = frappe.get_doc("Work Order Billing", name)
-
-#     if not doc.work_order_pdf:
-#         frappe.throw("Please attach the Work Order PDF.")
-
-#     try:
-#         # Step 1: Load PDF
-#         if doc.work_order_pdf.startswith("http"):
-#             response = requests.get(doc.work_order_pdf)
-#             if response.status_code != 200:
-#                 frappe.throw("❌ Failed to download PDF.")
-#             with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-#                 tmp.write(response.content)
-#                 pdf_path = tmp.name
-#         else:
-#             pdf_path = frappe.get_site_path("public", doc.work_order_pdf.replace("/files/", "files/"))
-
-#         # Step 2: Extract text
-#         text = extract_text_with_ocr(pdf_path)
-#         if not text.strip():
-#             frappe.throw("❌ OCR failed. No readable text found.")
-
-#         frappe.msgprint(f"📄 Text Preview:<br><pre>{text[:1500]}</pre>")
-
-#         # Step 3: Try regex (fallback legacy)
-#         pattern = r"(?:Rate per man day|Rate per day|Rate\/day)[^\d]{0,10}(\d{2,5}(?:\.\d{1,2})?)"
-#         matches = re.findall(pattern, text, re.IGNORECASE)
-#         rates = [float(m) for m in matches if 100 <= float(m) <= 1000]
-#         if rates:
-#             max_rate = max(rates)
-#             doc.rate_per_day = max_rate
-#             doc.save()
-#             frappe.msgprint(f"✅ Regex fallback rate: ₹{max_rate}")
-#             return "✅ Rate extracted using regex."
-
-#         # Step 4: Groq AI (multi-role rates)
-#         prompt = f"""
-# You're a quotation reader. Extract all job designations and their per-day rate.
-
-# Return JSON array:
-# [
-#   {{ "job_description": "Security Guard", "rate_per_day": 625 }},
-#   {{ "job_description": "Supervisor", "rate_per_day": 750 }}
-# ]
-
-# If rate is monthly/hourly, convert to per-day (26 working days/month, 8 hrs/day).
-
-# --- Start ---
-# {text[:8000]}
-# --- End ---
-# """
-#         client = get_groq_client()
-#         start = time.time()
-#         response = client.chat.completions.create(
-#             model="llama3-70b-8192",
-#             messages=[{"role": "user", "content": prompt}]
-#         )
-#         elapsed = round(time.time() - start, 2)
-#         result = response.choices[0].message.content or ""
-#         frappe.msgprint(f"🧠 Groq AI Output ({elapsed}s):<br><pre>{result}</pre>")
-
-#         json_match = re.search(r"\[\s*\{[\s\S]+?\}\s*\]", result)
-#         if json_match:
-#             job_rates = json.loads(json_match.group(0))
-#             doc.set("job_rate_details", [])
-#             for item in job_rates:
-#                 desc = item.get("job_description")
-#                 rate = item.get("rate_per_day")
-#                 if desc and rate:
-#                     doc.append("job_rate_details", {
-#                         "job_description": desc,
-#                         "rate_per_day": float(rate)
-#                     })
-
-#             # Optional: set max rate as fallback
-#             valid_rates = [r.get("rate_per_day") for r in job_rates if r.get("rate_per_day")]
-#             if valid_rates:
-#                 doc.rate_per_day = max(valid_rates)
-
-#             doc.save()
-#             return f"✅ Extracted {len(job_rates)} job rates from Groq AI."
-
-#         frappe.throw("❌ Groq could not return valid job rate list.")
-
-#     except OpenAIError as e:
-#         frappe.log_error(str(e), "Groq OpenAIError")
-#         frappe.throw("⚠️ Groq API error.")
-#     finally:
-#         if "pdf_path" in locals() and os.path.exists(pdf_path):
-#             os.remove(pdf_path)
-
-# # ------------------ Attendance XLS Parser ------------------
-
-
-# @frappe.whitelist()
-# # def parse_attendance_xlsx(name):
-# #     import pandas as pd
-# #     from frappe.utils import cstr
-
-# #     frappe.msgprint(f"⚙️ Parsing attendance for: {name}")
-# #     doc = frappe.get_doc("Work Order Billing", name)
-
-# #     if not doc.attendance_xls:
-# #         frappe.throw("Please upload Attendance XLS file.")
-
-# #     try:
-# #         file_path = frappe.get_site_path("public", doc.attendance_xls.replace("/files/", "files/"))
-# #         df = pd.read_excel(file_path)
-
-# #         required_columns = {"Employee Name", "Status", "Job Description", "Date"}
-# #         if not required_columns.issubset(df.columns):
-# #             frappe.throw("❌ Required columns missing. Make sure Excel has: 'Employee Name', 'Status', 'Job Description', and 'Date'.")
-
-# #         # Step 1: Group by (employee, job, date)
-# #         attendance_map = {}  # { (employee_name, job_description, date): count }
-# #         for _, row in df.iterrows():
-# #             emp = cstr(row.get("Employee Name", "")).strip()
-# #             status = cstr(row.get("Status", "")).strip().lower()
-# #             job = cstr(row.get("Job Description", "")).strip()
-# #             date = row.get("Date")
-
-# #             if emp and job and date and status == "present":
-# #                 key = (emp, job, date)
-# #                 attendance_map[key] = attendance_map.get(key, 0) + 1
-
-# #         # Step 2: Build job rate lookup
-# #         rate_lookup = {
-# #             row.job_description.strip(): row.rate_per_day
-# #             for row in doc.job_rate_details or []
-# #         }
-
-# #         # Step 3: Clear existing table
-# #         doc.set("guard_attendance_table", [])
-
-# #         total_days = 0
-# #         total_amount = 0.0
-
-# #         # Step 4: Append attendance entries
-# #         for (emp, job, att_date), days in attendance_map.items():
-# #             rate = rate_lookup.get(job)
-# #             if rate is None:
-# #                 frappe.msgprint(f"⚠️ No rate found for job: {job}. Using ₹0.")
-# #                 rate = 0.0
-
-# #             amount = float(rate) * days
-# #             total_days += days
-# #             total_amount += amount
-
-# #             # Log for verification
-# #             frappe.msgprint(f"🧾 {emp} | {job} | {att_date} | {days} × ₹{rate} = ₹{amount}")
-
-# #             doc.append("guard_attendance_table", {
-# #                 "employee_name": emp,
-# #                 "job_description": job,
-# #                 "present_days": days,
-# #                 "date": att_date  # ✅ new date field
-# #             })
-
-# #         doc.total_present_days = total_days
-# #         doc.amount = total_amount
-
-# #         frappe.msgprint(f"✅ Total Present Days: {total_days}<br>💰 Total Amount: ₹{total_amount:.2f}")
-# #         doc.save()
-
-# #         return f"✅ Parsed {len(attendance_map)} entries. Total Days: {total_days}, Total Amount: ₹{total_amount:.2f}"
-
-# #     except Exception as e:
-# #         frappe.log_error(str(e), "Attendance XLS Parse Error")
-# #         frappe.throw("⚠️ Error parsing attendance XLS.")
-
-
-
 import frappe
 from frappe.model.document import Document
 from frappe.utils import today, cstr
 
 class WorkOrderBilling(Document):
     def before_save(self):
-        if not self.upload_date:
+        if not getattr(self, "upload_date", None):
             self.upload_date = today()
+        # calculate_charges_breakup(self)
+    def validate(self):
+        calculate_job_rate_breakup(self)
 
-# ------------------ Groq Client ------------------
 
-def get_groq_client():
+
+def calculate_job_rate_breakup(doc, method=None):
+    percentage_lookup = {}
+
+    frappe.logger().debug("🔍 Building percentage lookup from Charges Breakup table...")
+    print("🔍 Building percentage lookup from Charges Breakup table...")
+
+    for row in doc.rate_breakup:
+        percentage_lookup[row.job_description] = {
+            "leave_wages": float(row.leave_wages or 0),
+            "national_and_festival_holidays": float(row.national_and_festival_holidays or 0),
+            "epf": float(row.epf or 0),
+            "esic": float(row.esic or 0),
+            "reliver_charges": float(row.reliver_charges or 0),
+            "service_charges": float(row.service_charges or 0),
+            "total_days": int(row.total_days or 26),  # ✅ Fallback to 26 if empty
+        }
+        log_msg = f"✔️ {row.job_description} => {percentage_lookup[row.job_description]}"
+        frappe.logger().debug(log_msg)
+        print(log_msg)
+
+    frappe.logger().debug("🚀 Starting calculations for each Job Rate row...")
+    print("🚀 Starting calculations for each Job Rate row...")
+
+    for row in doc.job_rate_details:
+        desc = row.job_description
+
+        if desc not in percentage_lookup:
+            msg = f"⚠️ No rate breakup found for job description: {desc}"
+            frappe.msgprint(msg)
+            frappe.logger().debug(msg)
+            print(msg)
+            continue
+
+        perc = percentage_lookup[desc]
+        total_days = perc["total_days"]
+
+        # ✅ Auto-calculate minimum_wages_per_month from rate_per_day
+        if row.rate_per_day:
+            row.minimum_wages_per_month = round(row.rate_per_day * total_days, 2)
+            frappe.logger().debug(f"📌 Auto-calculated minimum_wages_per_month for '{desc}': {row.minimum_wages_per_month}")
+            print(f"📌 Auto-calculated minimum_wages_per_month for '{desc}': {row.minimum_wages_per_month}")
+
+        mw = float(row.minimum_wages_per_month or 0)
+
+        if mw == 0:
+            msg = f"❌ Minimum wage is 0 for job: {desc}. Skipping..."
+            frappe.logger().debug(msg)
+            print(msg)
+            continue
+
+        # 🧮 Apply updated formulas
+        leave = round((mw / total_days) * perc["leave_wages"]/12, 2)
+        holiday = round((mw / total_days) * perc["national_and_festival_holidays"]/12, 2)
+        wage = mw + leave + holiday
+        epf = round((perc["epf"] / 100) * wage, 2)
+        esic = round((perc["esic"] / 100) * wage, 2)
+        gross = wage + epf + esic
+        reliever = round(mw * (perc["reliver_charges"] / 100), 2)  # ✅ if you want percentage-based reliever
+        service = round((gross * perc["service_charges"]) / 100, 2)
+        total = gross + reliever + service
+
+        # 🔄 Shift Multiplier Logic (Updated per_day calculation)
+        shift_multiplier = int(row.number_of_shifts or 1)
+        per_day = total * shift_multiplier
+
+        # 🔎 Debug Values
+        debug_data = {
+            "Leave Wages": leave,
+            "Holiday Wages": holiday,
+            "Wages": wage,
+            "EPF": epf,
+            "ESIC": esic,
+            "Gross Wages": gross,
+            "Reliever Charges": reliever,
+            "Service Charges": service,
+            "Total Monthly Payable": total,
+            "Total Per Day (Shifts Applied)": per_day
+        }
+
+        for key, val in debug_data.items():
+            msg = f"{key}: {val:.2f}"
+            frappe.logger().debug(msg)
+            print(msg)
+
+        # 📝 Set values in child row
+        row.leave_wages = leave
+        row.national_and_festival_holidays = holiday
+        row.wages = wage
+        row.epf = epf
+        row.esic = esic
+        row.statutory_benefit = round(epf + esic, 2)
+        row.gross_wages = round(gross, 2)
+        row.reliver_charges = reliever
+        row.service_charges = service
+        row.total_monthly_payable = round(total, 2)
+        row.total_per_day = per_day
+
+    # 🔁 Update total amount in parent doc
+    doc.amount = sum([row.total_monthly_payable or 0 for row in doc.job_rate_details])
+    final_msg = f"💰 Updated total amount on doc: {doc.amount}"
+    frappe.logger().debug(final_msg)
+    print(final_msg)
+
+
+# ---------------------- OpenAI Client ----------------------
+def get_openai_client():
     from openai import OpenAI
-    return OpenAI(
-        api_key=frappe.conf.get("groq_api_key"),
-        base_url="https://api.groq.com/openai/v1"
+    return OpenAI(api_key=frappe.conf.get("openai_api_key"))
+
+
+# ---------------------- AWS S3 & Textract ----------------------
+def upload_to_s3(local_file_path, s3_key):
+    import boto3
+    s3 = boto3.client(
+        "s3",
+        aws_access_key_id=frappe.conf.get("aws_access_key_id"),
+        aws_secret_access_key=frappe.conf.get("aws_secret_access_key"),
+        region_name=frappe.conf.get("aws_region"),
     )
+    bucket = frappe.conf.get("s3_bucket")
+    s3.upload_file(local_file_path, bucket, s3_key)
 
-# ------------------ PDF Compression ------------------
 
-def compress_pdf(input_path, output_path, scale_factor=0.5):
-    import fitz
-    pdf = fitz.open(input_path)
-    new_pdf = fitz.open()
-    for page in pdf:
-        pix = page.get_pixmap(matrix=fitz.Matrix(scale_factor, scale_factor))
-        img_pdf = fitz.open()
-        rect = fitz.Rect(0, 0, pix.width, pix.height)
-        img_page = img_pdf.new_page(width=pix.width, height=pix.height)
-        img_page.insert_image(rect, pixmap=pix)
-        new_pdf.insert_pdf(img_pdf)
-        img_pdf.close()
-    new_pdf.save(output_path)
-    new_pdf.close()
-    pdf.close()
+def start_textract_job(s3_key):
+    import boto3
+    textract = boto3.client(
+        "textract",
+        aws_access_key_id=frappe.conf.get("aws_access_key_id"),
+        aws_secret_access_key=frappe.conf.get("aws_secret_access_key"),
+        region_name=frappe.conf.get("aws_region"),
+    )
+    bucket = frappe.conf.get("s3_bucket")
+    response = textract.start_document_text_detection(
+        DocumentLocation={"S3Object": {"Bucket": bucket, "Name": s3_key}}
+    )
+    return response["JobId"]
 
-# ------------------ OCR.Space Fallback ------------------
 
-def ocr_with_ocrspace(pdf_path):
-    import requests, os
-    api_key = frappe.conf.get("ocrspace_api_key")
-    if not api_key:
-        frappe.throw("⚠️ Please configure 'ocrspace_api_key' in site config.")
-    if os.path.getsize(pdf_path) > 1024 * 1024:
-        frappe.throw("❌ PDF is too large for OCR.Space free plan (max 1 MB). Please compress it or upload a smaller file.")
-    with open(pdf_path, "rb") as f:
-        resp = requests.post(
-            "https://api.ocr.space/parse/image",
-            files={"file": f},
-            data={"apikey": api_key, "OCREngine": "2"}
-        )
-    data = resp.json()
-    if data.get("IsErroredOnProcessing"):
-        error = data.get("ErrorMessage") or data.get("ParsedResults", [{}])[0].get("ErrorMessage")
-        frappe.throw(f"❌ OCR.Space Error: {error}")
-    parsed = data.get("ParsedResults", [])
-    return "\n".join(p.get("ParsedText", "") for p in parsed)
+def get_textract_result(job_id):
+    import boto3
+    textract = boto3.client(
+        "textract",
+        aws_access_key_id=frappe.conf.get("aws_access_key_id"),
+        aws_secret_access_key=frappe.conf.get("aws_secret_access_key"),
+        region_name=frappe.conf.get("aws_region"),
+    )
+    return textract.get_document_text_detection(JobId=job_id)
 
-# ------------------ Extract Work Order Info ------------------
 
+# ---------------------- Extract Work Order Info ----------------------
 @frappe.whitelist()
 def extract_work_order_info(name):
-    import os
-    import tempfile
-    import re
-    import json
-    import requests
-    import fitz
-    import time
-    from openai import OpenAIError
+    import os, tempfile, requests, time, re, json
 
-    frappe.msgprint(f"⚙️ Extracting info for: {name}")
     doc = frappe.get_doc("Work Order Billing", name)
 
     if not doc.work_order_pdf:
-        frappe.throw("Please attach the Work Order PDF.")
+        frappe.throw("❌ Please attach the Work Order PDF.")
 
-    try:
-        # Step 1: Load PDF
-        if doc.work_order_pdf.startswith("http"):
-            response = requests.get(doc.work_order_pdf)
-            if response.status_code != 200:
-                frappe.throw("❌ Failed to download PDF.")
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-                tmp.write(response.content)
-                pdf_path = tmp.name
-        else:
-            pdf_path = frappe.get_site_path("public", doc.work_order_pdf.replace("/files/", "files/"))
+    # -------- Download PDF
+    if doc.work_order_pdf.startswith("http"):
+        response = requests.get(doc.work_order_pdf)
+        if response.status_code != 200:
+            frappe.throw("❌ Failed to download PDF.")
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+            tmp.write(response.content)
+            pdf_path = tmp.name
+    else:
+        pdf_path = frappe.get_site_path("public", doc.work_order_pdf.replace("/files/", "files/"))
 
-        # Step 2: Try direct text extraction
-        with fitz.open(pdf_path) as pdf:
-            text = "\n".join(page.get_text().strip() for page in pdf if page.get_text().strip())
+    # -------- Upload to S3 & run Textract
+    s3_key = f"work_orders/{name}.pdf"
+    upload_to_s3(pdf_path, s3_key)
+    job_id = start_textract_job(s3_key)
 
-        # Step 3: If no text found, try OCR fallback
-        if not text.strip():
-            frappe.msgprint("🔍 No direct text found. Trying compression + OCR fallback...")
+    while True:
+        result = get_textract_result(job_id)
+        status = result["JobStatus"]
+        if status == "SUCCEEDED":
+            break
+        elif status == "FAILED":
+            frappe.throw("❌ Textract job failed.")
+        time.sleep(5)
 
-            compressed_path = pdf_path.replace(".pdf", "_compressed.pdf")
-            compress_pdf(pdf_path, compressed_path)
+    # -------- Extract text
+    text = "\n".join([b["Text"] for b in result["Blocks"] if b["BlockType"] == "LINE"])
+    frappe.msgprint(f"📄 Textract Text Preview:<br><pre>{text[:1000]}</pre>")
 
-            if os.path.getsize(compressed_path) > 1024 * 1024:
-                frappe.throw("❌ PDF is still too large after compression. Please upload a smaller file.")
+    # -------- Regex fallback for single rate
+    regex_pattern = r"(?:Rate per man day|Rate per day|Rate/day)[^\d]{0,10}(\d{2,6}(?:\.\d{1,2})?)"
+    matches = re.findall(regex_pattern, text, re.IGNORECASE)
+    rates = [float(m) for m in matches if 100 <= float(m) <= 2000]
 
-            text = ocr_with_ocrspace(compressed_path)
+    if rates:
+        max_rate = max(rates)
+        doc.rate_per_day = max_rate
+        doc.save()
+        frappe.msgprint(f"✅ Regex fallback rate: ₹{max_rate}")
+        return f"✅ Regex fallback rate saved: ₹{max_rate}"
 
-        if not text.strip():
-            frappe.throw("❌ Could not extract any text from the PDF (direct or OCR).")
+    # -------- Otherwise use OpenAI for multiple job roles
+    client = get_openai_client()
+    prompt = prompt = f"""
+You are a smart work order reader.
 
-        frappe.msgprint(f"📄 Text Preview:<br><pre>{text[:1500]}</pre>")
-
-        # Step 4: Try regex fallback
-        pattern = r"(?:Rate per man day|Rate per day|Rate\/day)[^\d]{0,10}(\d{2,5}(?:\.\d{1,2})?)"
-        matches = re.findall(pattern, text, re.IGNORECASE)
-        rates = [float(m) for m in matches if 100 <= float(m) <= 1000]
-        if rates:
-            max_rate = max(rates)
-            doc.rate_per_day = max_rate
-            doc.save()
-            frappe.msgprint(f"✅ Regex fallback rate: ₹{max_rate}")
-            return "✅ Rate extracted using regex."
-
-        # Step 5: Groq AI fallback
-        prompt = f"""
-You're a quotation reader. Extract all job designations and their per-day rate.
-
-Return JSON array:
-[
-  {{ "job_description": "Security Guard", "rate_per_day": 625 }},
-  {{ "job_description": "Supervisor", "rate_per_day": 750 }}
-]
-
-If rate is monthly/hourly, convert to per-day (26 working days/month, 8 hrs/day).
-
---- Start ---
+Below is OCR text:
 {text[:8000]}
---- End ---
+
+Extract ALL job designations and their exact *Rate per man day* as shown in the text.
+DO NOT recalculate from monthly or hourly if *Rate per man day* is directly available.
+
+Return JSON array ONLY:
+[
+  {{"job_description": "...", "rate_per_day": 392.00}},
+  ...
+]
 """
-        client = get_groq_client()
-        start = time.time()
-        response = client.chat.completions.create(
-            model="llama3-70b-8192",
-            messages=[{"role": "user", "content": prompt}]
-        )
-        elapsed = round(time.time() - start, 2)
-        result = response.choices[0].message.content or ""
-        frappe.msgprint(f"🧠 Groq AI Output ({elapsed}s):<br><pre>{result}</pre>")
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    result = response.choices[0].message.content
+    frappe.msgprint(f"🧠 OpenAI Response:<br><pre>{result}</pre>")
 
-        json_match = re.search(r"\[\s*\{[\s\S]+?\}\s*\]", result)
-        if json_match:
-            job_rates = json.loads(json_match.group(0))
-            doc.set("job_rate_details", [])
-            for item in job_rates:
-                desc = item.get("job_description")
-                rate = item.get("rate_per_day")
-                if desc and rate:
-                    doc.append("job_rate_details", {
-                        "job_description": desc,
-                        "rate_per_day": float(rate)
-                    })
+    json_match = re.search(r"\[\s*\{[\s\S]+?\}\s*\]", result)
+    if not json_match:
+        frappe.throw("❌ Could not parse JSON array from AI.")
 
-            valid_rates = [r.get("rate_per_day") for r in job_rates if r.get("rate_per_day")]
-            if valid_rates:
-                doc.rate_per_day = max(valid_rates)
+    job_rates = json.loads(json_match.group(0))
 
-            doc.save()
-            return f"✅ Extracted {len(job_rates)} job rates from Groq AI."
+    doc.set("job_rate_details", [])
+    for item in job_rates:
+        desc = item.get("job_description")
+        rate = item.get("rate_per_day")
+        if desc and rate:
+            doc.append("job_rate_details", {
+                "job_description": desc.strip(),
+                "rate_per_day": float(rate)
+            })
+    doc.set("rate_breakup", [])
+    for item in job_rates:
+        desc = item.get("job_description")
+        if desc and rate:
+            doc.append("rate_breakup", {
+                "job_description": desc.strip(),
+            })
 
-        frappe.throw("❌ Groq could not return valid job rate list.")
+    valid_rates = [r.get("rate_per_day") for r in job_rates if r.get("rate_per_day")]
+    if valid_rates:
+        doc.rate_per_day = max(valid_rates)
 
-    except OpenAIError as e:
-        frappe.log_error(str(e), "Groq OpenAIError")
-        frappe.throw("⚠️ Groq API error.")
-    finally:
-        if "pdf_path" in locals() and os.path.exists(pdf_path):
-            os.remove(pdf_path)
+    doc.save()
+    return f"✅ Extracted {len(job_rates)} job rates and saved."
+
+# ---------------------- Attendance XLS Parser ----------------------
+@frappe.whitelist()
+def parse_attendance_xlsx(name):
+    import pandas as pd
+
+    doc = frappe.get_doc("Work Order Billing", name)
+
+    if not doc.attendance_xls:
+        frappe.throw("❌ Please attach Attendance XLS file.")
+
+    file_path = frappe.get_site_path("public", doc.attendance_xls.replace("/files/", "files/"))
+    df = pd.read_excel(file_path, engine='openpyxl')
+
+    required_columns = {"Employee Name", "Status", "Job Description", "Date"}
+    if not required_columns.issubset(df.columns):
+        frappe.throw("❌ Required columns missing in XLS.")
+
+    attendance_map = {}
+    for _, row in df.iterrows():
+        emp = cstr(row.get("Employee Name", "")).strip()
+        status = cstr(row.get("Status", "")).strip().lower()
+        job = cstr(row.get("Job Description", "")).strip()
+        date = row.get("Date")
+
+        if emp and job and date and status == "present":
+            key = (emp, job, date)
+            attendance_map[key] = attendance_map.get(key, 0) + 1
+
+    rate_lookup = {
+        row.job_description.strip(): row.rate_per_day
+        for row in doc.job_rate_details or []
+    }
+
+    doc.set("guard_attendance_table", [])
+
+    total_days = 0
+    total_amount = 0.0
+
+    for (emp, job, att_date), days in attendance_map.items():
+        rate = float(rate_lookup.get(job, 0))
+        amount = rate * days
+        total_days += days
+        total_amount += amount
+
+        doc.append("guard_attendance_table", {
+            "employee_name": emp,
+            "job_description": job,
+            "present_days": days,
+            "date": att_date
+        })
+
+    doc.total_present_days = total_days
+    doc.amount = total_amount
+
+    doc.save()
+    return f"✅ Parsed rows: {len(attendance_map)}, Total Days: {total_days}, Total Amount: ₹{total_amount:.2f}"
 
 
-
+# ---------------------- Attendance Template ----------------------
 @frappe.whitelist()
 def download_attendance_template(docname=None):
     import pandas as pd
     import os
     from frappe.utils import get_site_path
     from datetime import date
-    from frappe import _
 
-    # Sample DataFrame
     df = pd.DataFrame([{
         "Employee Name": "Ramesh Kumar",
         "Job Description": "Security Guard",
@@ -420,95 +339,35 @@ def download_attendance_template(docname=None):
         "Date": date.today().strftime("%Y-%m-%d")
     }])
 
-    # File path
     filename = f"Attendance_Template_{docname or 'template'}.xlsx"
     file_path = os.path.join(get_site_path("public", "files"), filename)
-
-    # Save to file
     df.to_excel(file_path, index=False)
 
-    frappe.msgprint(_("✅ Template generated successfully."))
     return f"/files/{filename}"
 
-@frappe.whitelist()
-def parse_attendance_xlsx(name):
-    import pandas as pd
-    from frappe.utils import cstr, today
-
-    frappe.msgprint(f"⚙️ Parsing attendance for: {name}")
-    doc = frappe.get_doc("Work Order Billing", name)
-
-    if not doc.attendance_xls:
-        frappe.throw("Please upload Attendance XLS file.")
-
-    try:
-        file_path = frappe.get_site_path("public", doc.attendance_xls.replace("/files/", "files/"))
-        frappe.msgprint(f"📁 Resolved file path: {file_path}")
-
-        df = pd.read_excel(file_path, engine='openpyxl')
-        frappe.msgprint(f"📊 Loaded columns: {list(df.columns)}")
-
-        required_columns = {"Employee Name", "Status", "Job Description", "Date"}
-        if not required_columns.issubset(df.columns):
-            frappe.throw("❌ Required columns missing. Make sure Excel has: 'Employee Name', 'Status', 'Job Description', and 'Date'.")
-
-        # Step 1: Group by (employee, job, date)
-        attendance_map = {}  # { (employee_name, job_description, date): count }
-        for _, row in df.iterrows():
-            emp = cstr(row.get("Employee Name", "")).strip()
-            status = cstr(row.get("Status", "")).strip().lower()
-            job = cstr(row.get("Job Description", "")).strip()
-            date = row.get("Date")
-
-            if emp and job and date and status == "present":
-                key = (emp, job, date)
-                attendance_map[key] = attendance_map.get(key, 0) + 1
-
-        # Step 2: Build job rate lookup
-        rate_lookup = {
-            row.job_description.strip(): row.rate_per_day
-            for row in doc.job_rate_details or []
+def calculate_charges_breakup(doc):
+    # Build a map of percentages from Charges Breakup
+    breakup_map = {
+        row.job_description.strip(): {
+            "leave_wages": row.leave_wages or 0,
+            "national_and_festival_holidays": row.national_and_festival_holidays or 0,
+            "epf": row.epf or 0,
+            "esic": row.esic or 0,
+            "reliver_charges": row.reliver_charges or 0,
+            "service_charges": row.service_charges or 0,
         }
+        for row in doc.rate_breakup or []
+    }
 
-        # Step 3: Clear existing table
-        doc.set("guard_attendance_table", [])
+    for row in doc.job_rate_details or []:
+        desc = row.job_description.strip()
+        rate_per_day = float(row.rate_per_day or 0)
 
-        total_days = 0
-        total_amount = 0.0
+        breakup = breakup_map.get(desc, {})
 
-        # Step 4: Append attendance entries
-        for (emp, job, att_date), days in attendance_map.items():
-            raw_rate = rate_lookup.get(job)
-            try:
-                rate = float(raw_rate)
-                if pd.isna(rate):
-                    raise ValueError("Rate is NaN")
-            except:
-                frappe.msgprint(f"⚠️ No valid rate found for job '{job}'. Using ₹0.")
-                rate = 0.0
-
-            amount = rate * days
-            total_days += days
-            total_amount += amount
-
-            # Log for verification
-            frappe.msgprint(f"🧾 {emp} | {job} | {att_date} | {days} × ₹{rate} = ₹{amount}")
-
-            doc.append("guard_attendance_table", {
-                "employee_name": emp or "",
-                "job_description": job or "",
-                "present_days": int(days),
-                "date": att_date or today()
-            })
-
-        doc.total_present_days = total_days
-        doc.amount = total_amount
-
-        frappe.msgprint(f"✅ Total Present Days: {total_days}<br>💰 Total Amount: ₹{total_amount:.2f}")
-        doc.save()
-
-        return f"✅ Parsed {len(attendance_map)} entries. Total Days: {total_days}, Total Amount: ₹{total_amount:.2f}"
-
-    except Exception as e:
-        frappe.log_error(str(e), "Attendance XLS Parse Error")
-        frappe.throw("⚠️ Error parsing attendance XLS.")
+        row.leave_wages = (rate_per_day * breakup.get("leave_wages", 0)) / 100
+        row.national_and_festival_holidays = (rate_per_day * breakup.get("national_and_festival_holidays", 0)) / 100
+        row.epf = (rate_per_day * breakup.get("epf", 0)) / 100
+        row.esic = (rate_per_day * breakup.get("esic", 0)) / 100
+        row.reliver_charges = (rate_per_day * breakup.get("reliver_charges", 0)) / 100
+        row.service_charges = (rate_per_day * breakup.get("service_charges", 0)) / 100

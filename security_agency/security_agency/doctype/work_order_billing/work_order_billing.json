@@ -12,14 +12,21 @@
   "amount",
   "column_break_blln",
   "payment_due_date",
-  "rate_per_day",
-  "attendance_xls",
   "total_present_days",
-  "generate_invoice",
+  "define_rate_breakup_section",
+  "rate_breakup",
   "section_break_mogi",
   "column_break_wapx",
   "job_rate_details",
-  "guard_attendance_table"
+  "attendance_xls",
+  "generate_invoice",
+  "guard_attendance_table",
+  "zoho_tab",
+  "invoice_lines",
+  "zoho_invoice_id",
+  "zoho_invoice_pdf_url",
+  "zoho_customer",
+  "push_to_zoho"
  ],
  "fields": [
   {
@@ -37,12 +44,6 @@
    "fieldname": "payment_due_date",
    "fieldtype": "Date",
    "label": "Payment Due Date"
-  },
-  {
-   "fieldname": "rate_per_day",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "Rate Per Day"
   },
   {
    "fieldname": "attendance_xls",
@@ -94,12 +95,55 @@
    "fieldtype": "Table",
    "label": "Guard Attendance Table",
    "options": "Guard Attendance Entry"
+  },
+  {
+   "fieldname": "define_rate_breakup_section",
+   "fieldtype": "Section Break",
+   "label": "Define Rate Breakup"
+  },
+  {
+   "fieldname": "rate_breakup",
+   "fieldtype": "Table",
+   "label": "Rate BreakUP",
+   "options": "Charges Breakup Work Order Billing"
+  },
+  {
+   "fieldname": "zoho_tab",
+   "fieldtype": "Tab Break",
+   "label": "Zoho"
+  },
+  {
+   "fieldname": "invoice_lines",
+   "fieldtype": "Table",
+   "label": "Invoice Line Items",
+   "options": "Work Order Invoice Line"
+  },
+  {
+   "fieldname": "zoho_invoice_id",
+   "fieldtype": "Data",
+   "label": "Zoho Invoice Id"
+  },
+  {
+   "fieldname": "zoho_invoice_pdf_url",
+   "fieldtype": "Data",
+   "label": "Zoho Invoice PDF URL"
+  },
+  {
+   "fieldname": "zoho_customer",
+   "fieldtype": "Link",
+   "label": "Zoho Customer",
+   "options": "Zoho Customer"
+  },
+  {
+   "fieldname": "push_to_zoho",
+   "fieldtype": "Button",
+   "label": "Push Invoice to Zoho"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-10 11:54:50.057826",
+ "modified": "2025-07-23 17:26:25.272170",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Work Order Billing",
