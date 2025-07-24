@@ -291,14 +291,13 @@ def fetch_and_save_zoho_customers():
 
 
 @frappe.whitelist(allow_guest=True)
-@frappe.whitelist(allow_guest=True)
 def my_auth_callback(code=None):
     if not code:
         frappe.throw("Missing code parameter")
 
     client_id = frappe.db.get_single_value("Zoho Settings", "client_id")
     client_secret = frappe.db.get_single_value("Zoho Settings", "client_secret")
-    redirect_uri = "http://localhost:8000/api/method/security_agency.api.zoho_integration.my_auth_callback"
+    redirect_uri = "https://erpmtss.m.frappe.cloud/api/method/security_agency.api.zoho_integration.my_auth_callback"
 
     url = "https://accounts.zoho.in/oauth/v2/token"
     data = {
