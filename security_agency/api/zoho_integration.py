@@ -291,6 +291,53 @@ def fetch_and_save_zoho_customers():
 
 
 @frappe.whitelist(allow_guest=True)
+# def my_auth_callback(code=None):
+#     if not code:
+#         frappe.throw("Missing code parameter")
+
+#     client_id = frappe.db.get_single_value("Zoho Settings", "client_id")
+#     client_secret = frappe.db.get_single_value("Zoho Settings", "client_secret")
+#     redirect_uri = "https://erpmtss.m.frappe.cloud/api/method/security_agency.api.zoho_integration.my_auth_callback"
+
+#     url = "https://accounts.zoho.in/oauth/v2/token"
+#     data = {
+#         "grant_type": "authorization_code",
+#         "code": code,
+#         "redirect_uri": redirect_uri,
+#         "client_id": client_id,
+#         "client_secret": client_secret
+#     }
+
+#     response = requests.post(url, data=data)
+
+#     # ✅ Log in error log for safety
+#     frappe.log_error(f"Zoho Token Exchange Debug: {response.status_code} {response.text}", "Zoho OAuth Debug")
+#     # ✅ Print to console
+#     print(f"🔑 Zoho Token Exchange Debug: {response.status_code} {response.text}")
+
+#     try:
+#         tokens = response.json()
+#     except:
+#         frappe.throw(f"Failed to parse JSON: {response.text}")
+
+#     if "error" in tokens:
+#         frappe.throw(f"Zoho OAuth Error: {tokens}")
+
+#     access_token = tokens.get("access_token")
+#     refresh_token = tokens.get("refresh_token")
+
+#     print(f"🔑 Access Token: {access_token}")
+#     print(f"🔄 Refresh Token: {refresh_token}")
+
+#     frappe.db.set_single_value("Zoho Settings", "access_token", access_token)
+#     frappe.db.set_single_value("Zoho Settings", "refresh_token", refresh_token)
+
+#     return {
+#         "message": "Zoho token received",
+#         "access_token": access_token,
+#         "refresh_token": refresh_token
+#     }
+@frappe.whitelist(allow_guest=True)
 def my_auth_callback(code=None):
     if not code:
         frappe.throw("Missing code parameter")
@@ -310,32 +357,23 @@ def my_auth_callback(code=None):
 
     response = requests.post(url, data=data)
 
-    # ✅ Log in error log for safety
-    frappe.log_error(f"Zoho Token Exchange Debug: {response.status_code} {response.text}", "Zoho OAuth Debug")
-    # ✅ Print to console
-    print(f"🔑 Zoho Token Exchange Debug: {response.status_code} {response.text}")
+    frappe.log_error(
+        "Zoho OAuth Debug",
+        f"Status Code: {response.status_code}\nResponse: {response.text}"
+    )
 
-    try:
-        tokens = response.json()
-    except:
-        frappe.throw(f"Failed to parse JSON: {response.text}")
+    tokens = response.json()
 
     if "error" in tokens:
         frappe.throw(f"Zoho OAuth Error: {tokens}")
 
-    access_token = tokens.get("access_token")
-    refresh_token = tokens.get("refresh_token")
-
-    print(f"🔑 Access Token: {access_token}")
-    print(f"🔄 Refresh Token: {refresh_token}")
-
-    frappe.db.set_single_value("Zoho Settings", "access_token", access_token)
-    frappe.db.set_single_value("Zoho Settings", "refresh_token", refresh_token)
+    frappe.db.set_single_value("Zoho Settings", "access_token", tokens.get("access_token"))
+    frappe.db.set_single_value("Zoho Settings", "refresh_token", tokens.get("refresh_token"))
 
     return {
         "message": "Zoho token received",
-        "access_token": access_token,
-        "refresh_token": refresh_token
+        "access_token": tokens.get("access_token"),
+        "refresh_token": tokens.get("refresh_token")
     }
 
 
