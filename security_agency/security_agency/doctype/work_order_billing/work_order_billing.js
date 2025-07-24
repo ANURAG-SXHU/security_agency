@@ -53,7 +53,7 @@ frappe.ui.form.on('Work Order Billing', {
 frappe.ui.form.on('Work Order Billing', {
     push_to_zoho: function(frm) {
         frappe.call({
-            method: "security_agency.api.push_invoice_to_zoho",
+            method: "security_agency.api.zoho_integration.push_invoice_to_zoho",
             args: { name: frm.doc.name },
             callback: function(r) {
                 frappe.msgprint(r.message);
