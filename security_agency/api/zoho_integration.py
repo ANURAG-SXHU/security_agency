@@ -441,7 +441,8 @@ def my_auth_callback(code=None):
 #     return f"✅ Pushed to Zoho Books! Invoice ID: {invoice_id}"
 @frappe.whitelist()
 def push_invoice_to_zoho(name):
-    """Push Work Order Billing invoice to Zoho Books"""
+    """Push Work Order Billing invoice to Zoho Books (India region)"""
+
     doc = frappe.get_doc("Work Order Billing", name)
 
     zoho_customer_id = frappe.db.get_value(
@@ -465,7 +466,7 @@ def push_invoice_to_zoho(name):
         "line_items": line_items
     }
 
-    # Log the final payload to verify!
+    # 🔍 Log for debugging
     frappe.log_error(json.dumps(payload, indent=2), "🔍 Zoho Invoice Payload")
 
     settings = get_zoho_settings()
@@ -475,11 +476,16 @@ def push_invoice_to_zoho(name):
     if not org_id:
         frappe.throw("Zoho Settings missing Org ID!")
 
+    # ✅ Fix: use the correct API domain!
+    api_domain = getattr(settings, "api_domain", "https://www.zohoapis.in")
+    if not api_domain:
+        frappe.throw("Zoho Settings missing API Domain!")
+
+    url = f"{api_domain}/books/v3/invoices?organization_id={org_id}"
+
     headers = {
         "Authorization": f"Zoho-oauthtoken {access_token}"
     }
-
-    url = f"https://books.zoho.in/api/v3/invoices?organization_id={org_id}"
 
     res = requests.post(url, headers=headers, json=payload)
 
