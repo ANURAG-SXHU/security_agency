@@ -440,37 +440,45 @@ def my_auth_callback(code=None):
 
 #     return f"✅ Pushed to Zoho Books! Invoice ID: {invoice_id}"
 @frappe.whitelist()
+import frappe
+import requests
+from frappe import _
+
+@frappe.whitelist()
 def push_invoice_to_zoho(name):
     """Push Work Order Billing invoice to Zoho Books"""
     doc = frappe.get_doc("Work Order Billing", name)
 
+    # Get Zoho Customer ID
     zoho_customer_id = frappe.db.get_value(
         "Zoho Customer",
         doc.zoho_customer,
         "zoho_customer_id"
     )
     if not zoho_customer_id:
-        frappe.throw("No Zoho Customer linked!")
+        frappe.throw(_("No Zoho Customer linked!"))
 
+    # ✅ Build line items with `description` (not `name`)
     line_items = []
     for row in doc.invoice_lines:
         line_items.append({
-            "name": row.description,
-            "description": row.description,
+            "description": row.description,  # ✅ Use description only
             "rate": row.rate,
             "quantity": row.quantity
         })
 
     payload = {
-        "invoice": {
-            "customer_id": zoho_customer_id,
-            "line_items": line_items
-        }
+        "customer_id": zoho_customer_id,
+        "line_items": line_items
     }
 
+    # Get org settings & tokens
     settings = get_zoho_settings()
     access_token = get_access_token()
     org_id = settings.org_id
+
+    if not org_id:
+        frappe.throw(_("Zoho Settings missing Org ID!"))
 
     headers = {
         "Authorization": f"Zoho-oauthtoken {access_token}"
@@ -478,19 +486,24 @@ def push_invoice_to_zoho(name):
 
     url = f"https://books.zoho.in/api/v3/invoices?organization_id={org_id}"
 
+    # Call API
     res = requests.post(url, headers=headers, json=payload)
 
+    # 🔑 Refresh & retry if expired
     if res.status_code == 401:
         access_token = refresh_access_token()
         headers["Authorization"] = f"Zoho-oauthtoken {access_token}"
         res = requests.post(url, headers=headers, json=payload)
 
+    # Raise error for HTTP
     res.raise_for_status()
     data = res.json()
 
+    # Handle API response error
     if data.get("code") != 0:
         frappe.throw(f"Zoho Error: {data}")
 
+    # ✅ Store returned invoice data
     invoice_id = data["invoice"]["invoice_id"]
     pdf_url = data["invoice"]["pdf_url"]
 
