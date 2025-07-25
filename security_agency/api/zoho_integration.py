@@ -441,10 +441,13 @@ def my_auth_callback(code=None):
 #     return f"✅ Pushed to Zoho Books! Invoice ID: {invoice_id}"
 @frappe.whitelist()
 def push_invoice_to_zoho(name):
-    """Push Work Order Billing invoice to Zoho Books (India region)"""
+    """Push Work Order Billing invoice to Zoho Books (India domain safe + fallback for PDF)"""
+
+    import json
 
     doc = frappe.get_doc("Work Order Billing", name)
 
+    # ✅ 1. Get Zoho Customer ID
     zoho_customer_id = frappe.db.get_value(
         "Zoho Customer",
         doc.zoho_customer,
@@ -453,6 +456,7 @@ def push_invoice_to_zoho(name):
     if not zoho_customer_id:
         frappe.throw("No Zoho Customer linked!")
 
+    # ✅ 2. Build line items
     line_items = []
     for row in doc.invoice_lines:
         line_items.append({
@@ -466,20 +470,16 @@ def push_invoice_to_zoho(name):
         "line_items": line_items
     }
 
-    # 🔍 Log for debugging
     frappe.log_error(json.dumps(payload, indent=2), "🔍 Zoho Invoice Payload")
 
+    # ✅ 3. Prepare Zoho config
     settings = get_zoho_settings()
     access_token = get_access_token()
     org_id = settings.org_id
+    api_domain = getattr(settings, "api_domain", "https://www.zohoapis.in")
 
     if not org_id:
         frappe.throw("Zoho Settings missing Org ID!")
-
-    # ✅ Fix: use the correct API domain!
-    api_domain = getattr(settings, "api_domain", "https://www.zohoapis.in")
-    if not api_domain:
-        frappe.throw("Zoho Settings missing API Domain!")
 
     url = f"{api_domain}/books/v3/invoices?organization_id={org_id}"
 
@@ -487,23 +487,41 @@ def push_invoice_to_zoho(name):
         "Authorization": f"Zoho-oauthtoken {access_token}"
     }
 
+    # ✅ 4. POST invoice
     res = requests.post(url, headers=headers, json=payload)
+
+    # Refresh & retry if 401
+    if res.status_code == 401:
+        access_token = refresh_access_token()
+        headers["Authorization"] = f"Zoho-oauthtoken {access_token}"
+        res = requests.post(url, headers=headers, json=payload)
 
     if res.status_code >= 400:
         frappe.log_error(res.text, "❌ Zoho Invoice API Error")
         frappe.throw(f"Zoho API Error: {res.text}")
 
     data = res.json()
-
     if data.get("code") != 0:
         frappe.throw(f"Zoho Error: {data}")
 
     invoice_id = data["invoice"]["invoice_id"]
-    pdf_url = data["invoice"]["pdf_url"]
+    pdf_url = data["invoice"].get("pdf_url")
+
+    # ✅ 5. Fallback GET if pdf_url is missing
+    if not pdf_url:
+        get_url = f"{api_domain}/books/v3/invoices/{invoice_id}?organization_id={org_id}"
+        get_res = requests.get(get_url, headers=headers)
+
+        if get_res.status_code >= 400:
+            frappe.log_error(get_res.text, "❌ Zoho GET Invoice API Error")
+            frappe.msgprint("Invoice pushed, but PDF URL could not be fetched.")
+            pdf_url = ""
+        else:
+            pdf_data = get_res.json()
+            pdf_url = pdf_data.get("invoice", {}).get("pdf_url", "")
 
     doc.zoho_invoice_id = invoice_id
     doc.zoho_invoice_pdf_url = pdf_url
     doc.save()
 
-    return f"✅ Pushed to Zoho Books! Invoice ID: {invoice_id}"
-
+    return f"✅ Pushed to Zoho Books! Invoice ID: {invoice_id}, PDF: {pdf_url or 'Not available'}"
