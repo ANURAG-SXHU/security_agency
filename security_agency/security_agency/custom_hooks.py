@@ -63,18 +63,11 @@ def mess_deduction(doc, method):
     if not doc.employee or not doc.start_date:
         return
 
-    # Get the first and last day of the salary month
-    from frappe.utils import add_months, get_first_day
+    salary_month = get_first_day(getdate(doc.start_date))
 
-    start_date = get_first_day(getdate(doc.start_date))
-    end_date = get_first_day(add_months(start_date, 1))  # First day of next month
-
-    # Fetch Mess Tracker documents where the 'month' falls in the salary month
+    # Get the Mess Tracker for the same month as salary slip
     mess_trackers = frappe.get_all("Mess Tracker",
-        filters={
-            "month": [">=", start_date],
-            "month": ["<", end_date]
-        },
+        filters={"month": salary_month},
         fields=["name"]
     )
 
@@ -91,9 +84,9 @@ def mess_deduction(doc, method):
         if detail:
             total_deduction += detail[0].amount_to_deduct
 
+    # Add deduction only if not already added
     if total_deduction and not any(d.salary_component == "Mess Deduction" for d in doc.deductions):
         doc.append("deductions", {
             "salary_component": "Mess Deduction",
             "amount": total_deduction
         })
-
