@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "AANOM-.YYYY.-.#####",
  "creation": "2025-07-14 09:10:04.700433",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -54,10 +55,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-14 09:12:42.514143",
+ "modified": "2025-07-27 10:51:30.432675",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Attendance Anomaly",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

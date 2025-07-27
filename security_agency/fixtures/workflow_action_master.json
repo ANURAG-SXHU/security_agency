@@ -26,5 +26,12 @@
   "modified": "2025-06-16 22:01:36.654428",
   "name": "Reject",
   "workflow_action_name": "Reject"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2025-07-27 11:05:14.110304",
+  "name": "Cancel",
+  "workflow_action_name": "Cancel"
  }
 ]

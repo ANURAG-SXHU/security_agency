@@ -1,101 +1,67 @@
 import frappe
-from frappe.utils import getdate, nowdate, add_days
+from frappe.utils import nowdate
 
-def execute():
-    today = getdate(nowdate())
-    weekday = today.strftime('%A')
+def mark_anomaly_for_no_checkin(employee_id, site=None, attendance_date=None):
+    """
+    Create an Attendance Anomaly if the employee did not check in on the given date.
+    """
+    if not attendance_date:
+        attendance_date = nowdate()
 
-    frappe.logger().info(f"🔍 Attendance Anomaly Check started for {today} ({weekday})")
+    # Check if attendance exists
+    attendance_exists = frappe.db.exists("Attendance", {
+        "employee": employee_id,
+        "attendance_date": attendance_date,
+        "docstatus": 1
+    })
 
-    # Get all Deployment Sheets covering today
-    deployments = frappe.get_all(
-        "Deployment Sheet",
-        filters={"week_start_date": ["<=", today]},
-        fields=["name", "week_start_date"]
-    )
+    if attendance_exists:
+        return  # Already marked present
 
-    for dep in deployments:
-        week_start = dep.week_start_date
-        week_end = add_days(week_start, 6)
+    # Check if anomaly already exists
+    anomaly_exists = frappe.db.exists("Attendance Anomaly", {
+        "guard": employee_id,
+        "date": attendance_date,
+        "type": "No Check-ins"
+    })
 
-        # Get planned deployments for this weekday
-        lines = frappe.get_all(
-            "Deployment Line",
-            filters={
-                "parent": dep.name,
-                "day": weekday
-            },
-            fields=["site", "guard"]
-        )
+    if anomaly_exists:
+        return  # Already marked as anomaly
 
-        if not lines:
-            frappe.logger().info(f"➡️ No deployment lines for {dep.name} on {weekday}")
-            continue
+    # Create anomaly document
+    anomaly = frappe.new_doc("Attendance Anomaly")
+    anomaly.date = attendance_date
+    anomaly.guard = employee_id
+    anomaly.site = site
+    anomaly.type = "No Check-ins"
+    anomaly.absentee_count = 1
+    anomaly.insert(ignore_permissions=True)
 
-        # Group guards by site
-        site_guards = {}
-        for line in lines:
-            site_guards.setdefault(line.site, []).append(line.guard)
+    frappe.msgprint(f"⚠️ Attendance Anomaly created for {employee_id} on {attendance_date}")
 
-        for site, guards in site_guards.items():
-            # Who checked in today?
-            checkins = frappe.get_all(
-                "GPS Check-in Request",
-                filters={
-                    "site": site,
-                    "employee": ["in", guards],
-                    "check_in_time": ["between", [today, add_days(today, 1)]]
-                },
-                fields=["employee"]
-            )
-            present_guards = {c.employee for c in checkins}
-            absent_guards = set(guards) - present_guards
 
-            if len(absent_guards) >= 3:
-                # Flag only if not already flagged
-                if not frappe.db.exists("Attendance Anomaly", {
-                    "site": site,
-                    "date": today,
-                    "type": "Site Anomaly"
-                }):
-                    anomaly_doc = frappe.get_doc({
-                        "doctype": "Attendance Anomaly",
-                        "site": site,
-                        "date": today,
-                        "absentee_count": len(absent_guards),
-                        "type": "Site Anomaly",
-                        "notes": f"3+ absentees: {', '.join(absent_guards)}"
-                    })
-                    anomaly_doc.insert(ignore_permissions=True)
-                    frappe.db.commit()
-                    frappe.logger().info(f"🚩 Flagged site {site}: {len(absent_guards)} absentees")
+def check_no_show_employees(site, date=None):
+    """
+    Check all guards assigned to a site and mark anomalies if they did not check in.
+    """
+    if not date:
+        date = nowdate()
 
-        # Check for guards with NO check-ins all week
-        unique_guards = {line.guard for line in lines}
-        for guard in unique_guards:
-            weekly_checkins = frappe.get_all(
-                "GPS Check-in Request",
-                filters={
-                    "employee": guard,
-                    "check_in_time": ["between", [week_start, week_end]]
-                },
-                fields=["name"]
-            )
-            if not weekly_checkins:
-                if not frappe.db.exists("Attendance Anomaly", {
-                    "guard": guard,
-                    "date": today,
-                    "type": "No Check-ins"
-                }):
-                    anomaly_doc = frappe.get_doc({
-                        "doctype": "Attendance Anomaly",
-                        "guard": guard,
-                        "date": today,
-                        "type": "No Check-ins",
-                        "notes": f"No GPS check-ins found for {guard} for week {week_start} to {week_end}."
-                    })
-                    anomaly_doc.insert(ignore_permissions=True)
-                    frappe.db.commit()
-                    frappe.logger().info(f"🚩 Flagged guard {guard}: No check-ins this week")
+    # Replace this with your actual assignment DocType
+    assigned_employees = frappe.get_all("Employee Site Assignment", {
+        "site": site
+    }, ["employee"])
 
-    frappe.logger().info("✅ Attendance Anomaly Check completed.")
+    for emp in assigned_employees:
+        mark_anomaly_for_no_checkin(emp.employee, site=site, attendance_date=date)
+
+
+def mark_daily_anomalies_for_all_sites():
+    """
+    Daily scheduler to mark anomalies for all sites.
+    """
+    all_sites = frappe.get_all("Site", pluck="name")
+    today = nowdate()
+
+    for site in all_sites:
+        check_no_show_employees(site, date=today)

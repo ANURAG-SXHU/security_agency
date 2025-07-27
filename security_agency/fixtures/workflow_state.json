@@ -169,5 +169,14 @@
   "name": "Draft",
   "style": "",
   "workflow_state_name": "Draft"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-07-27 11:04:42.867218",
+  "name": "Cancel",
+  "style": "",
+  "workflow_state_name": "Cancel"
  }
 ]

@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "DEP-.YYYY.-WK-.WW.-.####",
  "creation": "2025-07-14 09:04:35.540713",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -40,10 +41,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-14 09:06:08.379921",
+ "modified": "2025-07-27 10:53:43.456975",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Deployment Sheet",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

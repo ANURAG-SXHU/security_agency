@@ -61,7 +61,7 @@ web_include_css = [
 scheduler_events = {
     "daily": [
         "security_agency.security_agency.Tender_reminder.send_tender_reminders",
-        "security_agency.security_agency.attendance_anomaly.execute"
+        "security_agency.security_agency.attendance_anomaly.mark_daily_anomalies_for_all_sites"
     ],
     "hourly": [
         "security_agency.api.zoho_integration.refresh_access_token",
