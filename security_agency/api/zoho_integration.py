@@ -299,7 +299,7 @@ def push_invoice_to_zoho(name):
         send_url = f"{api_domain}/books/v3/invoices/{invoice_id}/email?organization_id={org_id}"
         email_payload = {
             "send_from_org_email_id": True,
-            "to_mail_ids": [doc.email or "dummy@example.com"],
+            "to_mail_ids": [frappe.db.get_value("Zoho Customer", doc.zoho_customer, "email") or "dummy@example.com"],
             "subject": "Invoice from your vendor",
             "body": "Please find the invoice attached."
         }
