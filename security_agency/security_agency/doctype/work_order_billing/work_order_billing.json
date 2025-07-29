@@ -131,8 +131,8 @@
   {
    "fieldname": "zoho_invoice_pdf_url",
    "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Zoho Invoice PDF URL"
+   "label": "Zoho Invoice PDF URL",
+   "read_only": 1
   },
   {
    "fieldname": "zoho_customer",
@@ -154,6 +154,7 @@
   {
    "fieldname": "bill_month",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Bill Month",
    "options": "\nJanuary\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
   },
@@ -172,7 +173,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-29 13:25:26.660079",
+ "modified": "2025-07-29 19:42:42.687374",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Work Order Billing",
