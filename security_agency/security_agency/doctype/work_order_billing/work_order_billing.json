@@ -148,6 +148,7 @@
   {
    "fieldname": "sac_code",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "SAC Code"
   },
   {
@@ -171,7 +172,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-29 13:08:11.378843",
+ "modified": "2025-07-29 13:25:26.660079",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Work Order Billing",

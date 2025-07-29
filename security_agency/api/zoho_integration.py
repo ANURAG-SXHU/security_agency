@@ -179,15 +179,11 @@ def push_invoice_to_zoho(name):
     "notes": doc.customer_notes or "",
     "terms": doc.terms_conditions or "",
     "custom_fields": [
-        {
-            "label": "SAC Code",
-            "value": doc.sac_code or ""
-        },
-        {
-            "label": "Bill Month",
-            "value": doc.bill_month or ""
-        }
-    ]
+    {
+        "customfield_id": "123456000000028017",
+        "value": doc.bill_month or ""
+    }
+]
 }
     frappe.log_error(json.dumps(payload, indent=2), "🔍 Zoho Invoice Payload")
 
