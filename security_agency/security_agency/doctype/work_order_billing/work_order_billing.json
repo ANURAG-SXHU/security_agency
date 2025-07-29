@@ -22,10 +22,14 @@
   "generate_invoice",
   "guard_attendance_table",
   "zoho_tab",
-  "invoice_lines",
-  "zoho_invoice_id",
-  "zoho_invoice_pdf_url",
   "zoho_customer",
+  "invoice_lines",
+  "sac_code",
+  "bill_month",
+  "customer_notes",
+  "terms_conditions",
+  "zoho_invoice_pdf_url",
+  "zoho_invoice_id",
   "push_to_zoho"
  ],
  "fields": [
@@ -121,11 +125,13 @@
   {
    "fieldname": "zoho_invoice_id",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Zoho Invoice Id"
   },
   {
    "fieldname": "zoho_invoice_pdf_url",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Zoho Invoice PDF URL"
   },
   {
@@ -138,12 +144,34 @@
    "fieldname": "push_to_zoho",
    "fieldtype": "Button",
    "label": "Push Invoice to Zoho"
+  },
+  {
+   "fieldname": "sac_code",
+   "fieldtype": "Data",
+   "label": "SAC Code"
+  },
+  {
+   "fieldname": "bill_month",
+   "fieldtype": "Select",
+   "label": "Bill Month",
+   "options": "\nJanuary\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
+  },
+  {
+   "fieldname": "customer_notes",
+   "fieldtype": "Small Text",
+   "label": "Customer Notes"
+  },
+  {
+   "default": "SGST @ 09% (As RCM)\nCGST @ 09% (As RCM)",
+   "fieldname": "terms_conditions",
+   "fieldtype": "Small Text",
+   "label": "Terms & Conditions"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-26 08:18:15.487785",
+ "modified": "2025-07-29 13:08:11.378843",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Work Order Billing",
