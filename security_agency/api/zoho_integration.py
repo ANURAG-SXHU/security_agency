@@ -177,13 +177,7 @@ def push_invoice_to_zoho(name):
     "customer_id": zoho_customer_id,
     "line_items": line_items,
     "notes": doc.customer_notes or "",
-    "terms": doc.terms_conditions or "",
-    "custom_fields": [
-    {
-        "customfield_id": "123456000000028017",
-        "value": doc.bill_month or ""
-    }
-]
+    "terms": doc.terms_conditions or ""
 }
     frappe.log_error(json.dumps(payload, indent=2), "🔍 Zoho Invoice Payload")
 
