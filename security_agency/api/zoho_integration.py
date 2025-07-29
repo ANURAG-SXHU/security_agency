@@ -238,22 +238,16 @@ def my_auth_callback(code=None):
 
 @frappe.whitelist()
 def push_invoice_to_zoho(name):
-    """Push Work Order Billing invoice to Zoho Books (India domain safe + fallback for PDF)"""
-
-    import json
+    import json, time
 
     doc = frappe.get_doc("Work Order Billing", name)
 
-    # ✅ 1. Get Zoho Customer ID
-    zoho_customer_id = frappe.db.get_value(
-        "Zoho Customer",
-        doc.zoho_customer,
-        "zoho_customer_id"
-    )
+    # Step 1: Get Customer ID
+    zoho_customer_id = frappe.db.get_value("Zoho Customer", doc.zoho_customer, "zoho_customer_id")
     if not zoho_customer_id:
         frappe.throw("No Zoho Customer linked to this Work Order Billing.")
 
-    # ✅ 2. Build line items
+    # Step 2: Build line items
     line_items = []
     for row in doc.invoice_lines:
         line_items.append({
@@ -262,44 +256,32 @@ def push_invoice_to_zoho(name):
             "quantity": float(row.quantity)
         })
 
-    # ✅ 3. Build payload
+    # Step 3: Build payload
     payload = {
         "customer_id": zoho_customer_id,
         "line_items": line_items,
         "notes": doc.customer_notes or "",
         "terms": doc.terms_conditions or ""
-        # "custom_fields": [
-        #     {
-        #         "customfield_id": "YOUR_CUSTOM_FIELD_ID",
-        #         "value": doc.bill_month or ""
-        #     }
-        # ]
     }
 
     frappe.log_error(json.dumps(payload, indent=2), "🔍 Zoho Invoice Payload")
 
-    # ✅ 4. Prepare Zoho config
+    # Step 4: Setup config
     settings = get_zoho_settings()
     access_token = get_access_token()
     org_id = settings.org_id
     api_domain = getattr(settings, "api_domain", "https://www.zohoapis.in")
 
-    if not org_id:
-        frappe.throw("Zoho Settings is missing the Organization ID.")
+    headers = {"Authorization": f"Zoho-oauthtoken {access_token}"}
+    create_url = f"{api_domain}/books/v3/invoices?organization_id={org_id}"
 
-    url = f"{api_domain}/books/v3/invoices?organization_id={org_id}"
-    headers = {
-        "Authorization": f"Zoho-oauthtoken {access_token}"
-    }
+    # Step 5: Create invoice
+    res = requests.post(create_url, headers=headers, json=payload)
 
-    # ✅ 5. Push invoice
-    res = requests.post(url, headers=headers, json=payload)
-
-    # Retry if unauthorized
     if res.status_code == 401:
         access_token = refresh_access_token()
         headers["Authorization"] = f"Zoho-oauthtoken {access_token}"
-        res = requests.post(url, headers=headers, json=payload)
+        res = requests.post(create_url, headers=headers, json=payload)
 
     if res.status_code >= 400:
         frappe.log_error(res.text, "❌ Zoho Invoice API Error")
@@ -310,26 +292,34 @@ def push_invoice_to_zoho(name):
         frappe.throw(f"Zoho Error: {json.dumps(data)}")
 
     invoice_id = data["invoice"]["invoice_id"]
-    pdf_url = data["invoice"].get("pdf_url")
+    pdf_url = data["invoice"].get("pdf_url", "")
 
-    # ✅ 6. Fallback GET if pdf_url is missing
-    if not pdf_url:
+    # Step 6: Conditionally trigger email to generate PDF
+    if not pdf_url and doc.send_invoice_email_to_generate_pdf:
+        send_url = f"{api_domain}/books/v3/invoices/{invoice_id}/email?organization_id={org_id}"
+        email_payload = {
+            "send_from_org_email_id": True,
+            "to_mail_ids": [doc.email or "dummy@example.com"],
+            "subject": "Invoice from your vendor",
+            "body": "Please find the invoice attached."
+        }
+        send_res = requests.post(send_url, headers=headers, json=email_payload)
+        time.sleep(2)
+
+        # Step 7: Fetch updated invoice
         get_url = f"{api_domain}/books/v3/invoices/{invoice_id}?organization_id={org_id}"
         get_res = requests.get(get_url, headers=headers)
 
-        if get_res.status_code >= 400:
-            frappe.log_error(get_res.text, "❌ Zoho GET Invoice API Error")
-            frappe.msgprint("Invoice pushed, but PDF URL could not be fetched.")
-            pdf_url = ""
+        if get_res.status_code == 200:
+            invoice_data = get_res.json().get("invoice", {})
+            pdf_url = invoice_data.get("pdf_url", "")
         else:
-            pdf_data = get_res.json()
-            pdf_url = pdf_data.get("invoice", {}).get("pdf_url", "")
-            if not pdf_url:
-                frappe.msgprint("Invoice created, but PDF is not yet available. Try again later.")
+            frappe.log_error(get_res.text, "❌ Zoho GET Invoice API Error")
 
-    # ✅ 7. Save back to Work Order Billing
+    # Step 8: Save to Work Order Billing
     doc.zoho_invoice_id = invoice_id
     doc.zoho_invoice_pdf_url = pdf_url
     doc.save(ignore_permissions=True)
 
     return f"✅ Pushed to Zoho Books! Invoice ID: {invoice_id}, PDF: {pdf_url or 'Not available'}"
+

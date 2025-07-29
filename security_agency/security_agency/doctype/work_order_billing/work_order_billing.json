@@ -28,9 +28,14 @@
   "bill_month",
   "customer_notes",
   "terms_conditions",
-  "zoho_invoice_pdf_url",
+  "section_break_ooal",
   "zoho_invoice_id",
-  "push_to_zoho"
+  "zoho_invoice_pdf_url",
+  "column_break_vblr",
+  "send_invoice_email_to_generate_pdf",
+  "section_break_izyz",
+  "push_to_zoho",
+  "column_break_fgxa"
  ],
  "fields": [
   {
@@ -168,12 +173,34 @@
    "fieldname": "terms_conditions",
    "fieldtype": "Small Text",
    "label": "Terms & Conditions"
+  },
+  {
+   "fieldname": "section_break_ooal",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_vblr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_invoice_email_to_generate_pdf",
+   "fieldtype": "Check",
+   "label": "Send Invoice Email to Generate PDF"
+  },
+  {
+   "fieldname": "section_break_izyz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_fgxa",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-29 19:42:42.687374",
+ "modified": "2025-07-29 23:23:16.129728",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Work Order Billing",
