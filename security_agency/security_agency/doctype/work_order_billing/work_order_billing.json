@@ -130,14 +130,12 @@
   {
    "fieldname": "zoho_invoice_id",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Zoho Invoice Id"
   },
   {
    "fieldname": "zoho_invoice_pdf_url",
    "fieldtype": "Data",
-   "label": "Zoho Invoice PDF URL",
-   "read_only": 1
+   "label": "Zoho Invoice PDF URL"
   },
   {
    "fieldname": "zoho_customer",
@@ -200,7 +198,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-29 23:23:16.129728",
+ "modified": "2025-07-30 10:09:54.205088",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Work Order Billing",
