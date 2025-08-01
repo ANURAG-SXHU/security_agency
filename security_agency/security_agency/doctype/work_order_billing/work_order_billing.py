@@ -1,7 +1,7 @@
 import frappe
 from frappe.model.document import Document
 from frappe.utils import today, cstr
-import pandas as pd
+# import pandas as pd
 from frappe.utils import flt
 
 class WorkOrderBilling(Document):
@@ -515,7 +515,93 @@ def calculate_charges_breakup(doc):
 #     doc.save()
 #     frappe.msgprint("[SUCCESS] Invoice Lines generated for all job descriptions.")
 
+# def generate_invoice_lines(docname):
+#     doc = frappe.get_doc("Work Order Billing", docname)
+#     doc.invoice_lines = []
+
+#     if doc.invoice_style != "Style A":
+#         frappe.msgprint("[INFO] Invoice style is not Style A. No lines generated.")
+#         return
+
+#     # Create a dictionary: {job_description: rate_breakup_row}
+#     rate_breakup_map = {rb.job_description: rb for rb in doc.rate_breakup}
+
+#     for job in doc.job_rate_details:
+#         job_desc = job.job_description
+#         total_attendance = float(job.total_attendance or 0)
+#         rate_per_day = float(job.rate_per_day or 0)
+
+#         if not job_desc:
+#             frappe.msgprint("[WARNING] Job description missing. Skipping entry.")
+#             continue
+
+#         if total_attendance == 0 or rate_per_day == 0:
+#             frappe.msgprint(f"[WARNING] Attendance or rate is zero for job: {job_desc}")
+#             continue
+
+#         # Calculate man month, monthly rate, and amount
+#         man_month = round(total_attendance / 30, 2)
+#         monthly_rate = round(rate_per_day * 30, 2)
+#         basic_amount = round(man_month * monthly_rate, 2)
+
+#         frappe.msgprint(f"[DEBUG] {job_desc} → Attendance: {total_attendance}, Rate/Day: {rate_per_day}, Man Month: {man_month}, Monthly Rate: {monthly_rate}, Basic: ₹{basic_amount}")
+
+#         # Add Basic Wages line
+#         description = f"{job_desc} ({total_attendance}/30 = {man_month} Man Month)"
+#         add_invoice_line(
+#             doc,
+#             description=description,
+#             quantity=man_month,
+#             rate=monthly_rate,
+#             amount=basic_amount
+#         )
+
+#         # Retrieve rate breakup for the job
+#         breakup = rate_breakup_map.get(job_desc)
+#         if not breakup:
+#             frappe.msgprint(f"[WARNING] No rate breakup found for: {job_desc}")
+#             continue
+
+#         # Add contribution lines
+#         add_percentage_line(doc, "EPF", breakup.epf, base_amount=basic_amount)
+#         add_percentage_line(doc, "ESIC", breakup.esic, base_amount=basic_amount)
+#         add_percentage_line(doc, "N.H & FESTIVALS", breakup.national_and_festival_holidays, base_amount=basic_amount)
+#         add_percentage_line(doc, "SERVICE CHARGES", breakup.service_charges, base_amount=basic_amount, quantity=man_month)
+
+#     doc.save()
+#     frappe.msgprint("[SUCCESS] Invoice lines successfully generated.")
+
+
+# # Utility function to add a direct invoice line
+# def add_invoice_line(doc, description, quantity, rate, amount):
+#     doc.append("invoice_lines", {
+#         "description": description,
+#         "quantity": quantity,
+#         "rate": rate,
+#         "amount": amount
+#     })
+#     frappe.msgprint(f"[LINE ADDED] {description} | Qty: {quantity}, Rate: ₹{rate}, Amount: ₹{amount}")
+
+
+# # Utility function to add a percentage-based line
+# def add_percentage_line(doc, label, percentage, base_amount, quantity=1):
+#     if not percentage or percentage <= 0:
+#         frappe.msgprint(f"[SKIPPED] {label} has no applicable percentage.")
+#         return
+
+#     amount = round((percentage / 100.0) * base_amount, 2)
+#     rate = round(amount / quantity, 2) if quantity else amount
+
+#     add_invoice_line(
+#         doc,
+#         description=f"{label} @ {percentage}% of Basic",
+#         quantity=quantity,
+#         rate=rate,
+#         amount=amount
+#     )
 def generate_invoice_lines(docname):
+    import pandas as pd  # Imported inside the function
+
     doc = frappe.get_doc("Work Order Billing", docname)
     doc.invoice_lines = []
 
