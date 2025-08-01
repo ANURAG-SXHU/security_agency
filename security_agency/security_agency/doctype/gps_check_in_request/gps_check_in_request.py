@@ -293,55 +293,94 @@ class GPSCheckinRequest(Document):
             frappe.msgprint("✅ Attendance created.")
 
 
+
 @frappe.whitelist()
-@frappe.whitelist()
-def create_attendance_for_employee(employee_id, attendance_datetime, ref_doctype=None, ref_name=None):
-    if not employee_id:
-        frappe.msgprint("❌ Employee ID is missing.")
-        return
+# def create_attendance_for_employee(employee_id, attendance_datetime, ref_doctype=None, ref_name=None):
+#     if not employee_id:
+#         frappe.msgprint("❌ Employee ID is missing.")
+#         return
 
-    check_in_dt = get_datetime(attendance_datetime)
-    attendance_date = check_in_dt.date()
+#     check_in_dt = get_datetime(attendance_datetime)
+#     attendance_date = check_in_dt.date()
 
-    exists = frappe.db.exists("Attendance", {
-        "employee": employee_id,
-        "attendance_date": attendance_date,
-        "docstatus": 1
-    })
-    if exists:
-        frappe.msgprint(f"ℹ️ Attendance already exists for {employee_id} on {attendance_date}.")
-        return
+#     exists = frappe.db.exists("Attendance", {
+#         "employee": employee_id,
+#         "attendance_date": attendance_date,
+#         "docstatus": 1
+#     })
+#     if exists:
+#         frappe.msgprint(f"ℹ️ Attendance already exists for {employee_id} on {attendance_date}.")
+#         return
 
-    employee = frappe.get_doc("Employee", employee_id)
+#     employee = frappe.get_doc("Employee", employee_id)
 
-    # If reference is a GPS Check-in Request, pull shift_type from it
+#     # If reference is a GPS Check-in Request, pull shift_type from it
+#     shift = None
+#     if ref_doctype == "GPS Check-in Request" and ref_name:
+#         shift = frappe.db.get_value("GPS Check-in Request", ref_name, "shift_type")
+
+#     attendance = frappe.new_doc("Attendance")
+#     attendance.naming_series = "HR-ATT-.YYYY.-"
+#     attendance.employee = employee_id
+#     attendance.attendance_date = attendance_date
+#     attendance.status = "Present"
+#     attendance.company = employee.company or "Default Company"
+#     attendance.department = employee.department or "General"
+#     attendance.in_time = check_in_dt
+
+#     if shift:
+#         attendance.shift = shift
+
+#     if frappe.get_meta("Attendance").has_field("reference_doctype"):
+#         attendance.reference_doctype = ref_doctype
+#     if frappe.get_meta("Attendance").has_field("reference_name"):
+#         attendance.reference_name = ref_name
+
+#     attendance.insert(ignore_permissions=True)
+#     attendance.submit()
+
+#     frappe.msgprint(f"✅ Attendance submitted for {employee_id} on {attendance_date}.")
+
+def create_attendance_for_employee(employee_id, attendance_date=None, status='Present', ref_doctype=None, ref_name=None):
+    if not attendance_date:
+        attendance_date = nowdate()
+
+    # Fetch shift from GPS Check-in Request
     shift = None
     if ref_doctype == "GPS Check-in Request" and ref_name:
         shift = frappe.db.get_value("GPS Check-in Request", ref_name, "shift_type")
 
-    attendance = frappe.new_doc("Attendance")
-    attendance.naming_series = "HR-ATT-.YYYY.-"
-    attendance.employee = employee_id
-    attendance.attendance_date = attendance_date
-    attendance.status = "Present"
-    attendance.company = employee.company or "Default Company"
-    attendance.department = employee.department or "General"
-    attendance.in_time = check_in_dt
+    if not shift:
+        frappe.msgprint("⚠️ Shift not found. Cannot check for duplicates.")
+        return
 
-    if shift:
-        attendance.shift = shift
+    # Check if attendance already exists for same employee, date, and shift
+    exists = frappe.db.exists("Attendance", {
+        "employee": employee_id,
+        "attendance_date": attendance_date,
+        "shift": shift,
+        "docstatus": 1
+    })
 
-    if frappe.get_meta("Attendance").has_field("reference_doctype"):
-        attendance.reference_doctype = ref_doctype
-    if frappe.get_meta("Attendance").has_field("reference_name"):
-        attendance.reference_name = ref_name
+    if exists:
+        frappe.msgprint(f"ℹ️ Attendance already exists for {employee_id} on {attendance_date} for shift {shift}.")
+        return
 
-    attendance.insert(ignore_permissions=True)
+    # Create Attendance
+    attendance = frappe.get_doc({
+        "doctype": "Attendance",
+        "employee": employee_id,
+        "attendance_date": attendance_date,
+        "status": status,
+        "shift": shift,
+        "company": frappe.db.get_value("Employee", employee_id, "company"),
+        "gps_checkin_ref": ref_name if ref_doctype == "GPS Check-in Request" else None,
+        "check_in_by": frappe.session.user
+    })
+
+    attendance.insert()
     attendance.submit()
-
-    frappe.msgprint(f"✅ Attendance submitted for {employee_id} on {attendance_date}.")
-
-
+    frappe.msgprint(f"✅ Attendance marked for {employee_id} on {attendance_date} for shift {shift}.")
 
 # ------------------------
 # GPS Check-in Request Permissions

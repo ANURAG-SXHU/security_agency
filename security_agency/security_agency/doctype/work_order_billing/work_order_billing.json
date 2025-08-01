@@ -22,6 +22,7 @@
   "generate_invoice",
   "guard_attendance_table",
   "zoho_tab",
+  "invoice_style",
   "zoho_customer",
   "invoice_lines",
   "sac_code",
@@ -68,6 +69,7 @@
   {
    "fieldname": "amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Amount"
   },
   {
@@ -193,12 +195,18 @@
   {
    "fieldname": "column_break_fgxa",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "invoice_style",
+   "fieldtype": "Select",
+   "label": "Invoice Style",
+   "options": "\nStyle A\nStyle B"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-30 10:09:54.205088",
+ "modified": "2025-07-31 09:32:04.136197",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Work Order Billing",

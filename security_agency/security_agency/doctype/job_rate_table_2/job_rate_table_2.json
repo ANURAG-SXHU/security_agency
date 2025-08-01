@@ -27,7 +27,9 @@
   "total_monthly_payable",
   "section_break_xwmb",
   "number_of_shifts",
-  "total_per_day"
+  "total_per_day",
+  "column_break_dhpr",
+  "total_attendance"
  ],
  "fields": [
   {
@@ -148,13 +150,22 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Total Per Day"
+  },
+  {
+   "fieldname": "column_break_dhpr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_attendance",
+   "fieldtype": "Data",
+   "label": "Total Attendance"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-07-26 08:16:39.458084",
+ "modified": "2025-07-30 10:42:15.657482",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Job Rate Table 2",

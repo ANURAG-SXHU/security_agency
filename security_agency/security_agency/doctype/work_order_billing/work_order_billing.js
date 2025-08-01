@@ -35,6 +35,21 @@
 // });
 frappe.ui.form.on('Work Order Billing', {
     refresh(frm) {
+        frm.add_custom_button("Generate Invoice Lines", () => {
+            frappe.call({
+                method: "security_agency.security_agency.doctype.work_order_billing.work_order_billing.generate_invoice_lines",
+                args: {
+                    docname: frm.doc.name
+                },
+                callback(r) {
+                    if (!r.exc) {
+                        frappe.msgprint("Invoice lines generated. Please reload the form.");
+                        frm.reload_doc();
+                    }
+                }
+            });
+        });
+
         frm.add_custom_button("Download Attendance Template", () => {
             frappe.call({
                 method: "security_agency.security_agency.doctype.work_order_billing.work_order_billing.download_attendance_template",
@@ -50,6 +65,7 @@ frappe.ui.form.on('Work Order Billing', {
         });
     }
 });
+
 frappe.ui.form.on('Work Order Billing', {
     push_to_zoho: function(frm) {
         frappe.call({

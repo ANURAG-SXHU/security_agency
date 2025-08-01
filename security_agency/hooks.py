@@ -44,7 +44,8 @@ app_include_js = [
     "/assets/security_agency/js/custom_loader.js",
     "/assets/security_agency/js/employee_group.js",
     "/assets/security_agency/js/work_ob.js",
-    "/assets/security_agency/js/planned_visit.js"
+    "/assets/security_agency/js/planned_visit.js",
+    "/assets/security_agency/js/guard_attendance_dashboard.js"
     # "/assets/security_agency/js/custom_workspace.js",
     # "/assets/security_agency/js/role_based_ui.js"
 ]
@@ -69,6 +70,10 @@ scheduler_events = {
     ]
 }
 
+# For whitelisting the API call
+override_whitelisted_methods = {
+    "security_agency.api.dashboard.get_guard_attendance_summary": "security_agency.api.dashboard.get_guard_attendance_summary"
+}
 
 
 doc_events = {
