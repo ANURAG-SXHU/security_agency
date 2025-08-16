@@ -36,3 +36,4 @@ if (frappe.ready) {
 } else {
     $(document).ready(() => hide_ui_for_roles());
 }
+// sd
