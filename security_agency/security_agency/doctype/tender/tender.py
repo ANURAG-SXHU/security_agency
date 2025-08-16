@@ -68,6 +68,192 @@ def get_textract_result(job_id):
     return textract.get_document_text_detection(JobId=job_id)
 
 @frappe.whitelist()
+# def extract_summary(name):
+#     import re
+#     import tempfile
+#     import os
+#     import json
+#     import requests
+#     import time
+#     import fitz  # PyMuPDF
+#     from dateutil import parser
+#     from openai._exceptions import OpenAIError
+
+#     doc = frappe.get_doc("Tender", name)
+
+#     if not doc.tender_pdf:
+#         frappe.throw("Please attach or link a Tender PDF.")
+
+#     if doc.tender_pdf.startswith("http://") or doc.tender_pdf.startswith("https://"):
+#         response = requests.get(doc.tender_pdf)
+#         if response.status_code != 200:
+#             frappe.throw("Failed to download the PDF from the provided URL.")
+#         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+#             tmp_file.write(response.content)
+#             tmp_file_path = tmp_file.name
+#         pdf_path = tmp_file_path
+#     else:
+#         pdf_path = frappe.get_site_path("public", doc.tender_pdf.replace("/files/", "files/"))
+
+#     try:
+#         full_text = ""
+
+#         # ✅ Try fitz first
+#         with fitz.open(pdf_path) as pdf:
+#             pages_text = []
+#             for page in pdf:
+#                 page_text = page.get_text("text")
+#                 if page_text.strip():
+#                     pages_text.append(page_text)
+#             full_text = "\n".join(pages_text)
+
+#         frappe.log_error(full_text[:2000], "FITZ Preview")
+
+#         # ✅ Fallback to Textract if empty
+#         if len(full_text.strip()) < 50:
+#             frappe.publish_realtime('textract_progress', {'status': 'Fallback: Uploading to Textract...'})
+#             s3_key = f"tenders/{name}.pdf"
+#             upload_to_s3(pdf_path, s3_key)
+
+#             job_id = start_textract_job(s3_key)
+
+#             while True:
+#                 result = get_textract_result(job_id)
+#                 status = result["JobStatus"]
+#                 frappe.publish_realtime('textract_progress', {'status': f'Textract job status: {status}'})
+#                 if status == "SUCCEEDED":
+#                     break
+#                 elif status == "FAILED":
+#                     frappe.throw("Textract job failed.")
+#                 time.sleep(5)
+
+#             pages_text = []
+#             for block in result["Blocks"]:
+#                 if block["BlockType"] == "LINE":
+#                     pages_text.append(block["Text"])
+#             full_text = "\n".join(pages_text)
+
+#             frappe.log_error(full_text[:2000], "Textract Fallback Preview")
+
+#         selected_text = full_text
+
+#         prompt = f"""
+# You are a professional tender summarizer AI.
+
+# Below is raw text from a government tender PDF.
+
+# 👉 Produce the following, **in this exact order**:
+
+# 📌 Scope of Work:
+# Write 1–2 detailed paragraphs describing WHAT work is to be done, WHERE, duration, contractor's main responsibility, and any specific conditions.
+
+# 📌 Eligibility Criteria:
+# - Write a clear bullet list.
+# - Include: minimum experience, average annual turnover, allowed Joint Venture (JV) rules, EMD amount and rules, solvency proof, certifications.
+# - Example: "- Minimum 3 years experience.\n- Average annual turnover of Rs. 30 lakhs for last 3 years.\n- JV permitted with max 2 firms.\n- Valid EMD as DD/Bank Guarantee.\n- PAN, GST mandatory."
+
+# 📌 Required Documents:
+# - Write each required document as a bullet.
+# - Example: "- Copy of PAN Card\n- GST Certificate\n- Power of Attorney\n- EMD DD/BG\n- Past work completion certificates\n- Affidavit as per tender annexure"
+
+# 📌 Tables:
+# If you see rows with tabs, rebuild as Markdown tables.
+
+# 📌 Dates:
+# Finally, return only this JSON at the end:
+# {{
+#   "submission_date": "YYYY-MM-DD",
+#   "emd_deadline": "YYYY-MM-DD",
+#   "pre_bid_date": "YYYY-MM-DD"
+# }}
+
+# 👉 If EMD Deadline is missing, use same as Submission.
+# 👉 If Pre-Bid Date is missing, return null.
+# 👉 Do NOT guess or invent dates.
+
+# Tender Text:
+# {selected_text[:12000]}
+# """
+
+#         frappe.publish_realtime('textract_progress', {'status': 'Sending text to OpenAI...'})
+#         client = get_openai_client()
+#         response = client.chat.completions.create(
+#             model="gpt-4o",
+#             messages=[{"role": "user", "content": prompt}]
+#         )
+
+#         result = response.choices[0].message.content
+
+#         def section_between(bigtext, start, end):
+#             if start in bigtext and end in bigtext:
+#                 return bigtext.split(start)[1].split(end)[0].strip()
+#             return ""
+
+#         doc.scope_of_work = section_between(result, "📌 Scope of Work:", "📌 Eligibility Criteria:")
+#         doc.eligibility_criteria = section_between(result, "📌 Eligibility Criteria:", "📌 Required Documents:")
+#         doc.required_documents = section_between(result, "📌 Required Documents:", "📌 Tables:")
+#         doc.tables_extracted = section_between(result, "📌 Tables:", "{")
+
+#         json_match = re.search(r'\{[\s\S]+?\}', result)
+#         if json_match:
+#             try:
+#                 dates = json.loads(json_match.group(0))
+#                 frappe.log_error(json.dumps(dates, indent=2), "Tender Dates Raw JSON")
+
+#                 submission_date = dates.get("submission_date")
+#                 if submission_date and submission_date != "null":
+#                     doc.submission_date = parser.parse(submission_date, dayfirst=True).date().isoformat()
+
+#                 emd_deadline = dates.get("emd_deadline")
+#                 if emd_deadline and emd_deadline != "null":
+#                     doc.emd_deadline = parser.parse(emd_deadline, dayfirst=True).date().isoformat()
+#                 else:
+#                     doc.emd_deadline = doc.submission_date
+
+#                 pre_bid_date = dates.get("pre_bid_date")
+#                 if pre_bid_date and pre_bid_date != "null":
+#                     doc.pre_bid_date = parser.parse(pre_bid_date, dayfirst=True).date().isoformat()
+#                 else:
+#                     doc.pre_bid_date = None
+
+#             except Exception as e:
+#                 frappe.log_error(str(e), "Tender Date JSON Parsing Error")
+
+#         # ✅ NEW: Get short scope summary
+#         summary_prompt = f"""
+# Below is the same tender text.
+# 👉 Write a crisp 1–2 line summary of the scope for a busy manager.
+
+# Tender Text:
+# {selected_text[:5000]}
+# """
+#         frappe.publish_realtime('textract_progress', {'status': 'Getting short scope summary...'})
+#         summary_response = client.chat.completions.create(
+#             model="gpt-4o",
+#             messages=[{"role": "user", "content": summary_prompt}]
+#         )
+#         doc.scope_summary = summary_response.choices[0].message.content.strip()
+
+#         # ✅ NEW: Format important dates nicely
+#         important_dates_str = f"""
+# - Submission Date: {doc.submission_date or 'N/A'}
+# - EMD Deadline: {doc.emd_deadline or 'N/A'}
+# - Pre-Bid Date: {doc.pre_bid_date or 'N/A'}
+# """.strip()
+#         doc.important_dates = important_dates_str
+
+#         doc.save()
+#         frappe.publish_realtime('textract_progress', {'status': 'Extraction done & saved.'})
+
+#     except OpenAIError as e:
+#         frappe.throw(f"OpenAI API error: {e}")
+
+#     finally:
+#         if "tmp_file_path" in locals() and os.path.exists(tmp_file_path):
+#             os.remove(tmp_file_path)
+
+#     return "Detailed summary, tables, short scope summary, and important dates extracted successfully."
+@frappe.whitelist()
 def extract_summary(name):
     import re
     import tempfile
@@ -84,6 +270,7 @@ def extract_summary(name):
     if not doc.tender_pdf:
         frappe.throw("Please attach or link a Tender PDF.")
 
+    # ✅ Get PDF path (URL or /files/)
     if doc.tender_pdf.startswith("http://") or doc.tender_pdf.startswith("https://"):
         response = requests.get(doc.tender_pdf)
         if response.status_code != 200:
@@ -137,6 +324,7 @@ def extract_summary(name):
 
         selected_text = full_text
 
+        # ✅ Updated AI Prompt with new fields
         prompt = f"""
 You are a professional tender summarizer AI.
 
@@ -144,17 +332,24 @@ Below is raw text from a government tender PDF.
 
 👉 Produce the following, **in this exact order**:
 
+📌 Basic Details:
+- Provide a short paragraph with tendering authority, work location, estimated cost, project duration, and any other key details.
+
+📌 Fee and Security:
+- Bullet list with Tender Fee, EMD value, Performance Security, Bank Guarantee rules, etc.
+
 📌 Scope of Work:
 Write 1–2 detailed paragraphs describing WHAT work is to be done, WHERE, duration, contractor's main responsibility, and any specific conditions.
 
 📌 Eligibility Criteria:
 - Write a clear bullet list.
 - Include: minimum experience, average annual turnover, allowed Joint Venture (JV) rules, EMD amount and rules, solvency proof, certifications.
-- Example: "- Minimum 3 years experience.\n- Average annual turnover of Rs. 30 lakhs for last 3 years.\n- JV permitted with max 2 firms.\n- Valid EMD as DD/Bank Guarantee.\n- PAN, GST mandatory."
 
 📌 Required Documents:
-- Write each required document as a bullet.
-- Example: "- Copy of PAN Card\n- GST Certificate\n- Power of Attorney\n- EMD DD/BG\n- Past work completion certificates\n- Affidavit as per tender annexure"
+- Write each required document as a bullet list.
+
+📌 Technical Bid Evaluation:
+- Describe how technical bids will be evaluated (marks, weightage, parameters).
 
 📌 Tables:
 If you see rows with tabs, rebuild as Markdown tables.
@@ -189,11 +384,16 @@ Tender Text:
                 return bigtext.split(start)[1].split(end)[0].strip()
             return ""
 
+        # ✅ Fill new + existing fields
+        doc.basic_details = section_between(result, "📌 Basic Details:", "📌 Fee and Security:")
+        doc.fee_and_security = section_between(result, "📌 Fee and Security:", "📌 Scope of Work:")
         doc.scope_of_work = section_between(result, "📌 Scope of Work:", "📌 Eligibility Criteria:")
         doc.eligibility_criteria = section_between(result, "📌 Eligibility Criteria:", "📌 Required Documents:")
-        doc.required_documents = section_between(result, "📌 Required Documents:", "📌 Tables:")
+        doc.required_documents = section_between(result, "📌 Required Documents:", "📌 Technical Bid Evaluation:")
+        doc.text_editor_chcp = section_between(result, "📌 Technical Bid Evaluation:", "📌 Tables:")
         doc.tables_extracted = section_between(result, "📌 Tables:", "{")
 
+        # ✅ Extract JSON dates
         json_match = re.search(r'\{[\s\S]+?\}', result)
         if json_match:
             try:
@@ -219,7 +419,7 @@ Tender Text:
             except Exception as e:
                 frappe.log_error(str(e), "Tender Date JSON Parsing Error")
 
-        # ✅ NEW: Get short scope summary
+        # ✅ NEW: Short scope summary
         summary_prompt = f"""
 Below is the same tender text.
 👉 Write a crisp 1–2 line summary of the scope for a busy manager.
@@ -234,7 +434,7 @@ Tender Text:
         )
         doc.scope_summary = summary_response.choices[0].message.content.strip()
 
-        # ✅ NEW: Format important dates nicely
+        # ✅ Format important dates nicely
         important_dates_str = f"""
 - Submission Date: {doc.submission_date or 'N/A'}
 - EMD Deadline: {doc.emd_deadline or 'N/A'}
@@ -252,7 +452,8 @@ Tender Text:
         if "tmp_file_path" in locals() and os.path.exists(tmp_file_path):
             os.remove(tmp_file_path)
 
-    return "Detailed summary, tables, short scope summary, and important dates extracted successfully."
+    return "✅ Detailed summary, new fields, short scope summary, and important dates extracted successfully."
+
 # @frappe.whitelist()
 # def ask_ai_for_rate(name):
 #     import re

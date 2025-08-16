@@ -12,6 +12,9 @@
   "section_break_elon",
   "extract_summary",
   "section_break_qnzk",
+  "basic_details",
+  "fee_and_security",
+  "text_editor_chcp",
   "scope_of_work",
   "required_documents",
   "eligibility_criteria",
@@ -173,12 +176,27 @@
    "fieldname": "important_dates",
    "fieldtype": "Long Text",
    "label": "Important Dates"
+  },
+  {
+   "fieldname": "basic_details",
+   "fieldtype": "Text Editor",
+   "label": "Basic Details"
+  },
+  {
+   "fieldname": "fee_and_security",
+   "fieldtype": "Text Editor",
+   "label": "Fee and Security"
+  },
+  {
+   "fieldname": "text_editor_chcp",
+   "fieldtype": "Text Editor",
+   "label": "Technical Bid Evalution"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-20 18:34:54.562446",
+ "modified": "2025-08-16 14:31:57.204702",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Tender",

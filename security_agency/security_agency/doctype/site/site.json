@@ -6,7 +6,9 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "site"
+  "site",
+  "regular_shifts",
+  "overtime_rate_per_shift"
  ],
  "fields": [
   {
@@ -14,12 +16,22 @@
    "fieldtype": "Data",
    "label": "Site",
    "unique": 1
+  },
+  {
+   "fieldname": "regular_shifts",
+   "fieldtype": "Int",
+   "label": "Regular Shifts Per Month"
+  },
+  {
+   "fieldname": "overtime_rate_per_shift",
+   "fieldtype": "Currency",
+   "label": "Overtime Rate per Shift"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-10 11:11:17.661186",
+ "modified": "2025-08-11 08:19:56.711957",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Site",

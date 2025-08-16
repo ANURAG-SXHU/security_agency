@@ -45,7 +45,8 @@ app_include_js = [
     "/assets/security_agency/js/employee_group.js",
     "/assets/security_agency/js/work_ob.js",
     "/assets/security_agency/js/planned_visit.js",
-    "/assets/security_agency/js/guard_attendance_dashboard.js"
+    "/assets/security_agency/js/guard_attendance_dashboard.js",
+    "/assets/security_agency/js/hide_sidebar.js"
     # "/assets/security_agency/js/custom_workspace.js",
     # "/assets/security_agency/js/role_based_ui.js"
 ]
@@ -84,7 +85,8 @@ doc_events = {
         "before_save": [
             "security_agency.security_agency.custom_hooks.joining_fee_deduction",
             "security_agency.security_agency.custom_hooks.advance_request_deduction",
-            "security_agency.security_agency.custom_hooks.mess_deduction"
+            "security_agency.security_agency.custom_hooks.mess_deduction",
+            "security_agency.security_agency.custom_hooks.add_overtime_from_gps"
         ],
         "on_submit": "security_agency.api.whatsapp.send_salary_slip_pdf_on_whatsapp"
     }

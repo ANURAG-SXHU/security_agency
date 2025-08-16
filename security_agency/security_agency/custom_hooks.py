@@ -90,3 +90,61 @@ def mess_deduction(doc, method):
             "salary_component": "Mess Deduction",
             "amount": total_deduction
         })
+def add_overtime_from_gps(doc, method):
+    # Run only if both employee and dates are set
+    if not doc.employee or not doc.start_date or not doc.end_date:
+        return
+
+    # Get GPS check-ins for the salary period
+    gps_entries = frappe.get_all(
+        "GPS Check-in Request",
+        filters={
+            "employee": doc.employee,
+            "check_in_time": ["between", [
+                f"{doc.start_date} 00:00:00",
+                f"{doc.end_date} 23:59:59"
+            ]]
+        },
+        fields=["site", "check_in_time"]
+    )
+
+    if not gps_entries:
+        return
+
+    # Count shifts per site
+    site_counts = {}
+    for entry in gps_entries:
+        if not entry.site:
+            continue
+        site_counts.setdefault(entry.site, 0)
+        site_counts[entry.site] += 1
+
+    overtime_amount = 0
+
+    for site_name, count in site_counts.items():
+        try:
+            site_doc = frappe.get_doc("Site", site_name)
+        except frappe.DoesNotExistError:
+            continue
+
+        regular_limit = site_doc.regular_shifts or 0
+        rate_per_shift = site_doc.overtime_rate_per_shift or 0
+
+        if count > regular_limit:
+            overtime_shifts = count - regular_limit
+            overtime_amount += overtime_shifts * rate_per_shift
+
+    # Add overtime component if amount > 0
+    if overtime_amount > 0:
+        # Check if Overtime already exists in earnings
+        exists = any(e.salary_component == "Overtime" for e in doc.earnings)
+        if not exists:
+            doc.append("earnings", {
+                "salary_component": "Overtime",
+                "amount": overtime_amount
+            })
+
+        # Recalculate salary totals
+        if hasattr(doc, "calculate_net_pay"):
+            doc.calculate_net_pay()
+

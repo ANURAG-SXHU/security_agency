@@ -1,4 +1,4 @@
-frappe.pages['guard-attendance-dashboard'].on_page_load = function(wrapper) {
+frappe.pages['guard-attendance-das'].on_page_load = function(wrapper) {
     const page = frappe.ui.make_app_page({
         parent: wrapper,
         title: 'Guard Attendance Dashboard',
