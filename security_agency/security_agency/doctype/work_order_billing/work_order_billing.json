@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:WOB-{MM}-{employee_name}-{#####}",
+ "autoname": "format:WOB-{MM}-{#####}",
  "creation": "2025-07-02 22:36:56.868692",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -206,7 +206,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-31 09:32:04.136197",
+ "modified": "2025-09-14 19:04:37.176081",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Work Order Billing",

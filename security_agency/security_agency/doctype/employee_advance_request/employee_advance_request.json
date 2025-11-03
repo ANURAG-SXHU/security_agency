@@ -16,7 +16,8 @@
   "upi_id",
   "qr",
   "status",
-  "deducted_in_salary"
+  "deducted_in_salary",
+  "qr_preview"
  ],
  "fields": [
   {
@@ -91,13 +92,19 @@
    "fieldname": "deducted_in_salary",
    "fieldtype": "Check",
    "label": "Deducted in Salary"
+  },
+  {
+   "depends_on": "eval:doc.qr",
+   "fieldname": "qr_preview",
+   "fieldtype": "HTML",
+   "label": "QR Preview"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-28 19:37:50.933954",
+ "modified": "2025-09-28 00:38:33.464639",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Employee Advance Request",

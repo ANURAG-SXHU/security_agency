@@ -489,3 +489,20 @@ function updateMapHTML(frm, lat, lon) {
         frm.fields_dict.map_html.$wrapper.html(html);
     }
 }
+frappe.ui.form.on('GPS Check-in Request', {
+    refresh: function(frm) {
+        // show our field-level button only if document is Draft
+        frm.toggle_display('submit', !frm.is_new() && frm.doc.docstatus === 0);
+    },
+
+    // this name must exactly match the fieldname of the Button in the DocType
+    submit: function(frm) {
+        frappe.confirm(
+            __('Are you sure you want to submit this Check-in?'),
+            function() {
+                frm.save('Submit');   // ✅ submit the doc
+            }
+        );
+    }
+});
+

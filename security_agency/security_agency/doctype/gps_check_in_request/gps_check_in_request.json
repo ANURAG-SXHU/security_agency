@@ -10,6 +10,7 @@
   "selfie",
   "upload_selfie",
   "shift_type",
+  "submit",
   "column_break_awky",
   "site",
   "status",
@@ -116,7 +117,8 @@
   {
    "fieldname": "upload_selfie",
    "fieldtype": "Attach Image",
-   "label": "Upload Selfie"
+   "label": "Upload Selfie",
+   "options": "public"
   },
   {
    "fieldname": "selfie_preview",
@@ -128,13 +130,18 @@
    "fieldtype": "Link",
    "label": "Shift Type",
    "options": "Shift Type"
+  },
+  {
+   "fieldname": "submit",
+   "fieldtype": "Button",
+   "label": "Submit"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-21 14:03:49.444982",
+ "modified": "2025-09-29 22:29:04.285016",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "GPS Check-in Request",

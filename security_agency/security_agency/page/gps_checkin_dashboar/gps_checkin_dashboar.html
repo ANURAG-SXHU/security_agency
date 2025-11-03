@@ -1,0 +1,44 @@
+<div class="container my-4">
+    <h2>GPS Check-in Dashboard</h2>
+    <div class="row text-center mb-4">
+        <div class="col-md-3">
+            <div class="card p-3 shadow">
+                <h5>Total Check-ins Today</h5>
+                <h3 id="total_today">0</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3 shadow">
+                <h5>Pending</h5>
+                <h3 id="pending">0</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3 shadow">
+                <h5>Approved</h5>
+                <h3 id="approved">0</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3 shadow">
+                <h5>Rejected</h5>
+                <h3 id="rejected">0</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card p-3 shadow">
+                <h5>Check-ins by Site (Last 7 Days)</h5>
+                <canvas id="chart_by_site"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card p-3 shadow">
+                <h5>Daily Check-ins (Last 7 Days)</h5>
+                <canvas id="chart_last7"></canvas>
+            </div>
+        </div>
+    </div>
+</div>

@@ -66,3 +66,24 @@ frappe.ui.form.on('Employee Advance Request', {
         frm.trigger('mode_of_payment');
     }
 });
+frappe.ui.form.on('Employee Advance Request', {
+    qr: function(frm) {
+        frm.trigger('show_qr_preview');
+    },
+    refresh: function(frm) {
+        frm.trigger('show_qr_preview');
+    },
+    show_qr_preview: function(frm) {
+        if (frm.doc.qr) {
+            frm.fields_dict.qr_preview.$wrapper.html(
+                `<div style="margin-top:15px; text-align:center;">
+                    <img src="${frm.doc.qr}" 
+                         style="max-width:250px; border:1px solid #ccc; padding:10px; border-radius:8px;"/>
+                    <p style="font-size:12px; color:#666;">QR Code Preview</p>
+                </div>`
+            );
+        } else {
+            frm.fields_dict.qr_preview.$wrapper.html('');
+        }
+    }
+});

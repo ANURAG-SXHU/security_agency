@@ -34,8 +34,16 @@ fixtures = [
     {"doctype": "Workflow"},
     {"doctype": "Workflow State"},
     {"doctype": "Workflow Action Master"},
-    {"doctype": "Role", "filters": [["role_name", "in", ["Guard", "Supervisor", "Field Officer"]]]}
+    {"doctype": "Role", "filters": [["role_name", "in", ["Guard", "Supervisor", "Field Officer"]]]},
+    # 👇 Add this block
+    {
+        "doctype": "DocType",
+        "filters": [
+            ["name", "in", ["Bulk Site Salary Slip Tool"]]
+        ]
+    }
 ]
+
 
 home_page = "app/operations-module"
 

@@ -67,192 +67,7 @@ def get_textract_result(job_id):
 
     return textract.get_document_text_detection(JobId=job_id)
 
-@frappe.whitelist()
-# def extract_summary(name):
-#     import re
-#     import tempfile
-#     import os
-#     import json
-#     import requests
-#     import time
-#     import fitz  # PyMuPDF
-#     from dateutil import parser
-#     from openai._exceptions import OpenAIError
 
-#     doc = frappe.get_doc("Tender", name)
-
-#     if not doc.tender_pdf:
-#         frappe.throw("Please attach or link a Tender PDF.")
-
-#     if doc.tender_pdf.startswith("http://") or doc.tender_pdf.startswith("https://"):
-#         response = requests.get(doc.tender_pdf)
-#         if response.status_code != 200:
-#             frappe.throw("Failed to download the PDF from the provided URL.")
-#         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
-#             tmp_file.write(response.content)
-#             tmp_file_path = tmp_file.name
-#         pdf_path = tmp_file_path
-#     else:
-#         pdf_path = frappe.get_site_path("public", doc.tender_pdf.replace("/files/", "files/"))
-
-#     try:
-#         full_text = ""
-
-#         # ✅ Try fitz first
-#         with fitz.open(pdf_path) as pdf:
-#             pages_text = []
-#             for page in pdf:
-#                 page_text = page.get_text("text")
-#                 if page_text.strip():
-#                     pages_text.append(page_text)
-#             full_text = "\n".join(pages_text)
-
-#         frappe.log_error(full_text[:2000], "FITZ Preview")
-
-#         # ✅ Fallback to Textract if empty
-#         if len(full_text.strip()) < 50:
-#             frappe.publish_realtime('textract_progress', {'status': 'Fallback: Uploading to Textract...'})
-#             s3_key = f"tenders/{name}.pdf"
-#             upload_to_s3(pdf_path, s3_key)
-
-#             job_id = start_textract_job(s3_key)
-
-#             while True:
-#                 result = get_textract_result(job_id)
-#                 status = result["JobStatus"]
-#                 frappe.publish_realtime('textract_progress', {'status': f'Textract job status: {status}'})
-#                 if status == "SUCCEEDED":
-#                     break
-#                 elif status == "FAILED":
-#                     frappe.throw("Textract job failed.")
-#                 time.sleep(5)
-
-#             pages_text = []
-#             for block in result["Blocks"]:
-#                 if block["BlockType"] == "LINE":
-#                     pages_text.append(block["Text"])
-#             full_text = "\n".join(pages_text)
-
-#             frappe.log_error(full_text[:2000], "Textract Fallback Preview")
-
-#         selected_text = full_text
-
-#         prompt = f"""
-# You are a professional tender summarizer AI.
-
-# Below is raw text from a government tender PDF.
-
-# 👉 Produce the following, **in this exact order**:
-
-# 📌 Scope of Work:
-# Write 1–2 detailed paragraphs describing WHAT work is to be done, WHERE, duration, contractor's main responsibility, and any specific conditions.
-
-# 📌 Eligibility Criteria:
-# - Write a clear bullet list.
-# - Include: minimum experience, average annual turnover, allowed Joint Venture (JV) rules, EMD amount and rules, solvency proof, certifications.
-# - Example: "- Minimum 3 years experience.\n- Average annual turnover of Rs. 30 lakhs for last 3 years.\n- JV permitted with max 2 firms.\n- Valid EMD as DD/Bank Guarantee.\n- PAN, GST mandatory."
-
-# 📌 Required Documents:
-# - Write each required document as a bullet.
-# - Example: "- Copy of PAN Card\n- GST Certificate\n- Power of Attorney\n- EMD DD/BG\n- Past work completion certificates\n- Affidavit as per tender annexure"
-
-# 📌 Tables:
-# If you see rows with tabs, rebuild as Markdown tables.
-
-# 📌 Dates:
-# Finally, return only this JSON at the end:
-# {{
-#   "submission_date": "YYYY-MM-DD",
-#   "emd_deadline": "YYYY-MM-DD",
-#   "pre_bid_date": "YYYY-MM-DD"
-# }}
-
-# 👉 If EMD Deadline is missing, use same as Submission.
-# 👉 If Pre-Bid Date is missing, return null.
-# 👉 Do NOT guess or invent dates.
-
-# Tender Text:
-# {selected_text[:12000]}
-# """
-
-#         frappe.publish_realtime('textract_progress', {'status': 'Sending text to OpenAI...'})
-#         client = get_openai_client()
-#         response = client.chat.completions.create(
-#             model="gpt-4o",
-#             messages=[{"role": "user", "content": prompt}]
-#         )
-
-#         result = response.choices[0].message.content
-
-#         def section_between(bigtext, start, end):
-#             if start in bigtext and end in bigtext:
-#                 return bigtext.split(start)[1].split(end)[0].strip()
-#             return ""
-
-#         doc.scope_of_work = section_between(result, "📌 Scope of Work:", "📌 Eligibility Criteria:")
-#         doc.eligibility_criteria = section_between(result, "📌 Eligibility Criteria:", "📌 Required Documents:")
-#         doc.required_documents = section_between(result, "📌 Required Documents:", "📌 Tables:")
-#         doc.tables_extracted = section_between(result, "📌 Tables:", "{")
-
-#         json_match = re.search(r'\{[\s\S]+?\}', result)
-#         if json_match:
-#             try:
-#                 dates = json.loads(json_match.group(0))
-#                 frappe.log_error(json.dumps(dates, indent=2), "Tender Dates Raw JSON")
-
-#                 submission_date = dates.get("submission_date")
-#                 if submission_date and submission_date != "null":
-#                     doc.submission_date = parser.parse(submission_date, dayfirst=True).date().isoformat()
-
-#                 emd_deadline = dates.get("emd_deadline")
-#                 if emd_deadline and emd_deadline != "null":
-#                     doc.emd_deadline = parser.parse(emd_deadline, dayfirst=True).date().isoformat()
-#                 else:
-#                     doc.emd_deadline = doc.submission_date
-
-#                 pre_bid_date = dates.get("pre_bid_date")
-#                 if pre_bid_date and pre_bid_date != "null":
-#                     doc.pre_bid_date = parser.parse(pre_bid_date, dayfirst=True).date().isoformat()
-#                 else:
-#                     doc.pre_bid_date = None
-
-#             except Exception as e:
-#                 frappe.log_error(str(e), "Tender Date JSON Parsing Error")
-
-#         # ✅ NEW: Get short scope summary
-#         summary_prompt = f"""
-# Below is the same tender text.
-# 👉 Write a crisp 1–2 line summary of the scope for a busy manager.
-
-# Tender Text:
-# {selected_text[:5000]}
-# """
-#         frappe.publish_realtime('textract_progress', {'status': 'Getting short scope summary...'})
-#         summary_response = client.chat.completions.create(
-#             model="gpt-4o",
-#             messages=[{"role": "user", "content": summary_prompt}]
-#         )
-#         doc.scope_summary = summary_response.choices[0].message.content.strip()
-
-#         # ✅ NEW: Format important dates nicely
-#         important_dates_str = f"""
-# - Submission Date: {doc.submission_date or 'N/A'}
-# - EMD Deadline: {doc.emd_deadline or 'N/A'}
-# - Pre-Bid Date: {doc.pre_bid_date or 'N/A'}
-# """.strip()
-#         doc.important_dates = important_dates_str
-
-#         doc.save()
-#         frappe.publish_realtime('textract_progress', {'status': 'Extraction done & saved.'})
-
-#     except OpenAIError as e:
-#         frappe.throw(f"OpenAI API error: {e}")
-
-#     finally:
-#         if "tmp_file_path" in locals() and os.path.exists(tmp_file_path):
-#             os.remove(tmp_file_path)
-
-#     return "Detailed summary, tables, short scope summary, and important dates extracted successfully."
 @frappe.whitelist()
 def extract_summary(name):
     import re
@@ -324,50 +139,66 @@ def extract_summary(name):
 
         selected_text = full_text
 
-        # ✅ Updated AI Prompt with new fields
+        # ✅ Improved AI Prompt
         prompt = f"""
-You are a professional tender summarizer AI.
+You are an expert Government Tender Data Extraction AI.
 
-Below is raw text from a government tender PDF.
+You must carefully read the tender text below and extract structured data.
 
-👉 Produce the following, **in this exact order**:
+STRICT OUTPUT FORMAT:
+Your response **must** follow this exact structure and order:
 
 📌 Basic Details:
-- Provide a short paragraph with tendering authority, work location, estimated cost, project duration, and any other key details.
+(Write a short paragraph including Tendering Authority, Tender ID (if found), Work Location, Estimated Project Cost, Project Duration, and any other key details.)
 
 📌 Fee and Security:
-- Bullet list with Tender Fee, EMD value, Performance Security, Bank Guarantee rules, etc.
+- Tender Fee: …
+- EMD (Earnest Money Deposit): …
+- Performance Security: …
+- Bank Guarantee / Security Deposit Rules: …
 
 📌 Scope of Work:
-Write 1–2 detailed paragraphs describing WHAT work is to be done, WHERE, duration, contractor's main responsibility, and any specific conditions.
+Write 2–3 concise but rich paragraphs describing:
+- What work is to be done
+- Where and for how long
+- Contractor’s key deliverables and constraints
+- Any special compliance or environmental/safety rules
 
 📌 Eligibility Criteria:
-- Write a clear bullet list.
-- Include: minimum experience, average annual turnover, allowed Joint Venture (JV) rules, EMD amount and rules, solvency proof, certifications.
+Bullet list with:
+- Required experience (years, project type, size)
+- Minimum average annual turnover
+- Joint Venture (JV) rules
+- Required certifications/licenses
+- Solvency proof or financial criteria
+- Mandatory EMD payment details
 
 📌 Required Documents:
-- Write each required document as a bullet list.
+Bullet list of mandatory documents (technical + financial).
 
 📌 Technical Bid Evaluation:
-- Describe how technical bids will be evaluated (marks, weightage, parameters).
+Explain in 2–4 sentences how technical bids will be scored.
+If marks or weightage tables are mentioned, recreate them as Markdown tables.
 
 📌 Tables:
-If you see rows with tabs, rebuild as Markdown tables.
+If the tender contains structured tabular data (e.g. BOQ, payment schedule),
+convert it into Markdown tables, keeping all columns.
 
 📌 Dates:
-Finally, return only this JSON at the end:
+Return a valid JSON object at the end (and only at the end) in this format:
 {{
   "submission_date": "YYYY-MM-DD",
   "emd_deadline": "YYYY-MM-DD",
   "pre_bid_date": "YYYY-MM-DD"
 }}
 
-👉 If EMD Deadline is missing, use same as Submission.
-👉 If Pre-Bid Date is missing, return null.
-👉 Do NOT guess or invent dates.
+Rules:
+- If EMD Deadline is missing, use the same date as submission_date.
+- If Pre-Bid Date is missing, use null.
+- Never invent or guess a date.
 
 Tender Text:
-{selected_text[:12000]}
+{selected_text[:15000]}
 """
 
         frappe.publish_realtime('textract_progress', {'status': 'Sending text to OpenAI...'})
@@ -384,7 +215,7 @@ Tender Text:
                 return bigtext.split(start)[1].split(end)[0].strip()
             return ""
 
-        # ✅ Fill new + existing fields
+        # ✅ Fill fields
         doc.basic_details = section_between(result, "📌 Basic Details:", "📌 Fee and Security:")
         doc.fee_and_security = section_between(result, "📌 Fee and Security:", "📌 Scope of Work:")
         doc.scope_of_work = section_between(result, "📌 Scope of Work:", "📌 Eligibility Criteria:")
@@ -419,10 +250,16 @@ Tender Text:
             except Exception as e:
                 frappe.log_error(str(e), "Tender Date JSON Parsing Error")
 
-        # ✅ NEW: Short scope summary
+        # ✅ Short scope summary
         summary_prompt = f"""
-Below is the same tender text.
-👉 Write a crisp 1–2 line summary of the scope for a busy manager.
+You are an assistant summarizer.
+
+Write a single, powerful sentence (max 40 words) describing the core scope of this tender:
+- What needs to be built/supplied/executed
+- Where
+- Any key quantity or duration if found
+
+Avoid extra words, disclaimers, or repetition.
 
 Tender Text:
 {selected_text[:5000]}
@@ -434,7 +271,6 @@ Tender Text:
         )
         doc.scope_summary = summary_response.choices[0].message.content.strip()
 
-        # ✅ Format important dates nicely
         important_dates_str = f"""
 - Submission Date: {doc.submission_date or 'N/A'}
 - EMD Deadline: {doc.emd_deadline or 'N/A'}
@@ -454,56 +290,7 @@ Tender Text:
 
     return "✅ Detailed summary, new fields, short scope summary, and important dates extracted successfully."
 
-# @frappe.whitelist()
-# def ask_ai_for_rate(name):
-#     import re
-#     from openai._exceptions import OpenAIError
 
-#     doc = frappe.get_doc("Tender", name)
-
-#     # Use scope summary first, fallback to scope of work
-#     base_text = doc.scope_summary or doc.scope_of_work
-#     if not base_text:
-#         frappe.throw("Scope Summary or Scope of Work is required to ask for rate.")
-
-#     prompt = f"""
-# You are a cost estimator AI.
-
-# Below is the scope of work:
-
-# {base_text}
-
-# 👉 Suggest a fair market rate for this tender in INR, considering standard rates in India.
-# 👉 Give a clear cost justification.
-# 👉 Return only this JSON at the end:
-# {{
-#   "suggested_rate": "number",
-#   "cost_justification": "your explanation"
-# }}
-# """
-
-#     client = get_openai_client()
-#     try:
-#         response = client.chat.completions.create(
-#             model="gpt-4o",
-#             messages=[{"role": "user", "content": prompt}]
-#         )
-#         result = response.choices[0].message.content
-
-#         json_match = re.search(r'\{[\s\S]+?\}', result)
-#         if json_match:
-#             import json
-#             parsed = json.loads(json_match.group(0))
-#             doc.suggested_rate = float(parsed.get("suggested_rate", 0))
-#             doc.cost_justification = parsed.get("cost_justification", "").strip()
-#             doc.save()
-#             return "Suggested rate and justification saved."
-#         else:
-#             frappe.throw("Could not parse AI response.")
-
-#     except OpenAIError as e:
-#         frappe.throw(f"OpenAI error: {e}")
-@frappe.whitelist()
 @frappe.whitelist()
 def ask_ai_for_rate(name):
     import re
@@ -512,23 +299,23 @@ def ask_ai_for_rate(name):
 
     doc = frappe.get_doc("Tender", name)
 
-    # ✅ Check: use scope summary first, fallback to scope of work
     base_text = doc.scope_summary or doc.scope_of_work
     if not base_text:
         frappe.throw("Scope Summary or Scope of Work is required to ask for rate.")
 
-    # ✅ Strict JSON prompt
     prompt = f"""
-Below is the scope of work.
+You are an Indian public works cost estimator.
 
+Based only on the scope below, estimate a fair market tender value (in INR).
+Use current Indian market rates, typical material & labor costs, overheads, and risk margins.
+
+Scope of Work:
 {base_text}
 
-👉 Suggest a fair market rate for this tender in INR, considering standard rates in India.
-👉 Provide a clear 3–5 sentence cost justification.
-👉 Return ONLY this JSON — do NOT add any text before or after:
+Return **only** a strict JSON like:
 {{
-  "suggested_rate": 0,
-  "cost_justification": "..."
+  "suggested_rate": <numeric_value_in_INR>,
+  "cost_justification": "Explain cost drivers (materials, manpower, transport, risk, etc.) in 3–5 full sentences."
 }}
 """
 
@@ -537,140 +324,33 @@ Below is the scope of work.
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are a cost estimator. Reply only with valid JSON — no commentary, no formatting."},
+                {"role": "system", "content": "Always respond with valid JSON only. No prose, no markdown."},
                 {"role": "user", "content": prompt}
             ]
         )
 
         result = response.choices[0].message.content.strip()
-
-        # ✅ Debug: log exactly what you got
         frappe.log_error(result, "AI Cost Estimator Raw Output")
 
-        # ✅ Try to find the JSON block robustly
         json_match = re.search(r'\{[\s\S]+?\}', result)
         if not json_match:
             frappe.throw(f"❌ Could not find valid JSON in AI output: {result}")
 
         parsed = json.loads(json_match.group(0))
 
-        # ✅ Basic validation
         doc.suggested_rate = float(parsed.get("suggested_rate", 0))
         doc.cost_justification = parsed.get("cost_justification", "").strip()
 
         doc.save()
-
         return "✅ Suggested rate and justification saved."
 
     except OpenAIError as e:
         frappe.throw(f"OpenAI error: {e}")
-
     except json.JSONDecodeError as e:
         frappe.throw(f"❌ JSON parse error: {e}")
 
 
 @frappe.whitelist()
-# def run_manual_prompt(name):
-#     import re
-#     import os
-#     import requests
-#     import tempfile
-#     import time
-#     import fitz  # PyMuPDF
-#     from openai._exceptions import OpenAIError
-
-#     doc = frappe.get_doc("Tender", name)
-
-#     if not doc.manual_ai_prompt or not doc.manual_ai_prompt.strip():
-#         frappe.throw("Please write something in the Manual AI Prompt field.")
-
-#     if not doc.tender_pdf:
-#         frappe.throw("Please attach or link a Tender PDF.")
-
-#     if doc.tender_pdf.startswith("http://") or doc.tender_pdf.startswith("https://"):
-#         response = requests.get(doc.tender_pdf)
-#         if response.status_code != 200:
-#             frappe.throw("Failed to download the PDF from the provided URL.")
-#         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
-#             tmp_file.write(response.content)
-#             tmp_file_path = tmp_file.name
-#         pdf_path = tmp_file_path
-#     else:
-#         pdf_path = frappe.get_site_path("public", doc.tender_pdf.replace("/files/", "files/"))
-
-#     try:
-#         full_text = ""
-
-#         # Try fitz first
-#         with fitz.open(pdf_path) as pdf:
-#             pages_text = []
-#             for page in pdf:
-#                 page_text = page.get_text("text")
-#                 if page_text.strip():
-#                     pages_text.append(page_text)
-#             full_text = "\n".join(pages_text)
-
-#         frappe.log_error(full_text[:2000], "FITZ Preview Manual Prompt")
-
-#         if len(full_text.strip()) < 50:
-#             frappe.publish_realtime('textract_progress', {'status': 'Fallback: Uploading to Textract...'})
-#             s3_key = f"tenders/{name}.pdf"
-#             upload_to_s3(pdf_path, s3_key)
-
-#             job_id = start_textract_job(s3_key)
-
-#             while True:
-#                 result = get_textract_result(job_id)
-#                 status = result["JobStatus"]
-#                 frappe.publish_realtime('textract_progress', {'status': f'Textract job status: {status}'})
-#                 if status == "SUCCEEDED":
-#                     break
-#                 elif status == "FAILED":
-#                     frappe.throw("Textract job failed.")
-#                 time.sleep(5)
-
-#             pages_text = []
-#             for block in result["Blocks"]:
-#                 if block["BlockType"] == "LINE":
-#                     pages_text.append(block["Text"])
-#             full_text = "\n".join(pages_text)
-
-#             frappe.log_error(full_text[:2000], "Textract Fallback Manual Prompt")
-
-#         manual_prompt = f"""
-# Below is raw tender PDF text.
-# Treat rows with tabs as Markdown tables if any.
-
-# User Question:
-# {doc.manual_ai_prompt}
-
-# Tender Text:
-# {full_text[:12000]}
-# """
-
-#         frappe.publish_realtime('textract_progress', {'status': 'Sending manual prompt to OpenAI...'})
-#         client = get_openai_client()
-#         response = client.chat.completions.create(
-#             model="gpt-4o",
-#             messages=[{"role": "user", "content": manual_prompt}]
-#         )
-
-#         result = response.choices[0].message.content
-#         doc.ai_response = result
-#         doc.save()
-#         frappe.publish_realtime('textract_progress', {'status': 'Manual prompt complete & saved.'})
-
-#         return "Manual prompt executed with PDF context."
-
-#     except OpenAIError as e:
-#         frappe.throw(f"OpenAI manual prompt failed: {e}")
-
-#     finally:
-#         if "tmp_file_path" in locals() and os.path.exists(tmp_file_path):
-#             os.remove(tmp_file_path)
-
-
-
 def run_manual_prompt(name):
     import re
     import os
@@ -702,7 +382,6 @@ def run_manual_prompt(name):
     try:
         full_text = ""
 
-        # Try fitz first
         with fitz.open(pdf_path) as pdf:
             pages_text = []
             for page in pdf:
@@ -739,14 +418,18 @@ def run_manual_prompt(name):
             frappe.log_error(full_text[:2000], "Textract Fallback Manual Prompt")
 
         manual_prompt = f"""
-Below is raw tender PDF text.
-Treat rows with tabs as Markdown tables if any.
+Below is raw text extracted from the tender PDF.
 
-User Question:
+User Query:
 {doc.manual_ai_prompt}
 
+Answer precisely and factually.
+- If the tender contains tables, recreate them in clean Markdown tables.
+- Keep bullet points concise.
+- Do not add disclaimers or generic advice.
+
 Tender Text:
-{full_text[:12000]}
+{full_text[:15000]}
 """
 
         frappe.publish_realtime('textract_progress', {'status': 'Sending manual prompt to OpenAI...'})
@@ -758,27 +441,17 @@ Tender Text:
 
         result = response.choices[0].message.content.strip()
 
-        # ✅ POST-PROCESSING: Remove unwanted symbols & phrases
+        # ✅ Clean result
         cleaned_result = result
-
-        # Remove headings like ## Heading
         cleaned_result = re.sub(r'^#+\s*', '', cleaned_result, flags=re.MULTILINE)
-
-        # Remove bold **text**
         cleaned_result = re.sub(r'\*\*(.*?)\*\*', r'\1', cleaned_result)
-
-        # Remove single *emphasis*
         cleaned_result = re.sub(r'\*(.*?)\*', r'\1', cleaned_result)
-
-        # Remove disclaimers or filler
         cleaned_result = re.sub(
             r'(please refer.*?\.)|(typically)|(generally)|(for precise details.*?)',
             '',
             cleaned_result,
             flags=re.IGNORECASE
         )
-
-        # Collapse multiple blank lines
         cleaned_result = re.sub(r'\n\s*\n', '\n\n', cleaned_result).strip()
 
         doc.ai_response = cleaned_result
