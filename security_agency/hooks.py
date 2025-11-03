@@ -36,12 +36,12 @@ fixtures = [
     {"doctype": "Workflow Action Master"},
     {"doctype": "Role", "filters": [["role_name", "in", ["Guard", "Supervisor", "Field Officer"]]]},
     # 👇 Add this block
-    {
-        "doctype": "DocType",
-        "filters": [
-            ["name", "in", ["Bulk Site Salary Slip Tool"]]
-        ]
-    }
+    # {
+    #     "doctype": "DocType",
+    #     "filters": [
+    #         ["name", "in", ["Bulk Site Salary Slip Tool"]]
+    #     ]
+    # }
 ]
 
 
