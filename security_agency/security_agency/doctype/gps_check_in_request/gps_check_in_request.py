@@ -68,13 +68,34 @@ class GPSCheckinRequest(Document):
         if self.upload_selfie:
             make_public(self.upload_selfie)
 
+    # def autoname(self):
+    #     if not self.check_in_time:
+    #         self.check_in_time = now_datetime()
+
+    #     date_str = formatdate(self.check_in_time, "yyyyMMdd")
+    #     emp_name = frappe.db.get_value("Employee", self.employee, "employee_name") or "UNKNOWN"
+    #     self.name = f"{emp_name.replace(' ', '').upper()}-{date_str}"
     def autoname(self):
         if not self.check_in_time:
             self.check_in_time = now_datetime()
 
         date_str = formatdate(self.check_in_time, "yyyyMMdd")
         emp_name = frappe.db.get_value("Employee", self.employee, "employee_name") or "UNKNOWN"
-        self.name = f"{emp_name.replace(' ', '').upper()}-{date_str}"
+        base_name = f"{emp_name.replace(' ', '').upper()}-{date_str}"
+
+        # Get existing records for the same employee and date
+        existing = frappe.db.sql(
+            """SELECT name FROM `tabGPS Check-in Request`
+            WHERE name LIKE %s ORDER BY creation DESC""",
+            (f"{base_name}-%",),
+        )
+
+        # Determine sequence number
+        seq = len(existing) + 1
+        seq_str = str(seq).zfill(3)  # Pads with zeros (001, 002, 003...)
+
+        # Final name
+        self.name = f"{base_name}-{seq_str}"
 
     def before_insert(self):
         self.workflow_state = "Draft"
