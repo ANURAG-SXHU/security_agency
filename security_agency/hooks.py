@@ -78,6 +78,24 @@ scheduler_events = {
         "security_agency.api.zoho_integration.fetch_and_save_zoho_customers"
     ]
 }
+# scheduler_events = {
+#     "daily": [
+#         "security_agency.security_agency.Tender_reminder.send_tender_reminders",
+#         "security_agency.security_agency.attendance_anomaly.mark_daily_anomalies_for_all_sites"
+#     ],
+
+#     "hourly": [
+#         "security_agency.api.zoho_integration.refresh_access_token",
+#         "security_agency.api.zoho_integration.fetch_and_save_zoho_customers"
+#     ],
+
+#     # 🔹 Run this every 1st of the month at midnight (00:00)
+#     "cron": {
+#         "0 0 1 * *": [
+#             "security_agency.security_agency.custom_hooks.update_regular_shifts_by_month_days"
+#         ]
+#     }
+# }
 
 # For whitelisting the API call
 # override_whitelisted_methods = {

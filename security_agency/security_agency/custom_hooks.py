@@ -1,5 +1,7 @@
 import frappe
 from frappe.utils import getdate, get_first_day
+import calendar
+from datetime import date
 
 def joining_fee_deduction(doc, method):
     if not doc.employee or not doc.start_date:
@@ -322,3 +324,58 @@ def add_overtime_from_gps(doc, method):
         frappe.msgprint(f"💸 Auto Overtime Added: ₹{total_overtime_amount:.2f}", indicator="green")
     else:
         print("ℹ️ No overtime detected for this employee.")
+
+def update_regular_shifts_and_overtime_rate():
+    """
+    Automatically update:
+    - regular_shifts = number of days in the current month
+    - overtime_rate_per_shift = salary / number_of_days_in_month
+    """
+    today = date.today()
+    year, month = today.year, today.month
+
+    # Get total number of days in this month
+    total_days = calendar.monthrange(year, month)[1]
+    month_name = calendar.month_name[month]
+
+    # Fetch all sites
+    sites = frappe.get_all("Site", fields=["name", "salary"])
+
+    if not sites:
+        frappe.logger().info("⚠️ No Site records found for monthly update.")
+        return
+
+    for s in sites:
+        # --- Update regular_shifts ---
+        frappe.db.set_value("Site", s.name, "regular_shifts", total_days)
+
+        # --- Update overtime_rate_per_shift ---
+        salary = 0
+        try:
+            salary = float(s.salary or 0)
+        except:
+            salary = 0
+
+        overtime_rate = 0
+        if salary > 0:
+            overtime_rate = round(salary / total_days, 2)
+
+        frappe.db.set_value("Site", s.name, "overtime_rate_per_shift", overtime_rate)
+
+        frappe.logger().info(
+            f"🏢 Site: {s.name} | Month: {month_name} | Days: {total_days} | "
+            f"Salary: ₹{salary} | Overtime/Shift: ₹{overtime_rate}"
+        )
+
+    frappe.db.commit()
+
+    frappe.logger().info(
+        f"✅ Updated {len(sites)} sites — Regular Shifts: {total_days}, "
+        f"Overtime Rate calculated for {month_name} {year}"
+    )
+
+    frappe.msgprint(
+        f"✅ Auto-updated {len(sites)} sites: Regular Shifts = {total_days}, "
+        f"Overtime Rate = Salary ÷ {total_days} ({month_name})",
+        indicator="green"
+    )

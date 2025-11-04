@@ -9,7 +9,8 @@
  "field_order": [
   "site",
   "regular_shifts",
-  "overtime_rate_per_shift"
+  "overtime_rate_per_shift",
+  "salary"
  ],
  "fields": [
   {
@@ -27,12 +28,17 @@
    "fieldname": "overtime_rate_per_shift",
    "fieldtype": "Currency",
    "label": "Overtime Rate per Shift"
+  },
+  {
+   "fieldname": "salary",
+   "fieldtype": "Data",
+   "label": "Salary"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-14 19:43:24.162125",
+ "modified": "2025-11-04 15:38:00.231759",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Site",
