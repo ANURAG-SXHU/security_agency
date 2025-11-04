@@ -80,9 +80,20 @@ scheduler_events = {
 }
 
 # For whitelisting the API call
+# override_whitelisted_methods = {
+#     "security_agency.api.dashboard.get_guard_attendance_summary": "security_agency.api.dashboard.get_guard_attendance_summary"
+# }
+# Keep your existing API override here
 override_whitelisted_methods = {
-    "security_agency.api.dashboard.get_guard_attendance_summary": "security_agency.api.dashboard.get_guard_attendance_summary"
+    "security_agency.api.dashboard.get_guard_attendance_summary":
+        "security_agency.api.dashboard.get_guard_attendance_summary"
 }
+
+# ✅ Add this new section for Attendance class override
+override_doctype_class = {
+    "Attendance": "security_agency.security_agency.attendance_override.CustomAttendance"
+}
+
 
 
 doc_events = {

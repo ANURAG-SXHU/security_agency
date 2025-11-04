@@ -90,61 +90,235 @@ def mess_deduction(doc, method):
             "salary_component": "Mess Deduction",
             "amount": total_deduction
         })
+# def add_overtime_from_gps(doc, method):
+#     # Run only if both employee and dates are set
+#     if not doc.employee or not doc.start_date or not doc.end_date:
+#         return
+
+#     # Get GPS check-ins for the salary period
+#     gps_entries = frappe.get_all(
+#         "GPS Check-in Request",
+#         filters={
+#             "employee": doc.employee,
+#             "check_in_time": ["between", [
+#                 f"{doc.start_date} 00:00:00",
+#                 f"{doc.end_date} 23:59:59"
+#             ]]
+#         },
+#         fields=["site", "check_in_time"]
+#     )
+
+#     if not gps_entries:
+#         return
+
+#     # Count shifts per site
+#     site_counts = {}
+#     for entry in gps_entries:
+#         if not entry.site:
+#             continue
+#         site_counts.setdefault(entry.site, 0)
+#         site_counts[entry.site] += 1
+
+#     overtime_amount = 0
+
+#     for site_name, count in site_counts.items():
+#         try:
+#             site_doc = frappe.get_doc("Site", site_name)
+#         except frappe.DoesNotExistError:
+#             continue
+
+#         regular_limit = site_doc.regular_shifts or 0
+#         rate_per_shift = site_doc.overtime_rate_per_shift or 0
+
+#         if count > regular_limit:
+#             overtime_shifts = count - regular_limit
+#             overtime_amount += overtime_shifts * rate_per_shift
+
+#     # Add overtime component if amount > 0
+#     if overtime_amount > 0:
+#         # Check if Overtime already exists in earnings
+#         exists = any(e.salary_component == "Overtime" for e in doc.earnings)
+#         if not exists:
+#             doc.append("earnings", {
+#                 "salary_component": "Overtime",
+#                 "amount": overtime_amount
+#             })
+
+#         # Recalculate salary totals
+#         if hasattr(doc, "calculate_net_pay"):
+#             doc.calculate_net_pay()
+
+
+# def add_overtime_from_gps(doc, method):
+#     if not doc.employee or not doc.start_date or not doc.end_date:
+#         print("❌ Missing employee or date range — skipping overtime calculation.")
+#         return
+
+#     gps_entries = frappe.get_all(
+#         "GPS Check-in Request",
+#         filters={
+#             "employee": doc.employee,
+#             "check_in_time": ["between", [
+#                 f"{doc.start_date} 00:00:00",
+#                 f"{doc.end_date} 23:59:59"
+#             ]]
+#         },
+#         fields=["site", "check_in_time", "shift_type"],
+#         order_by="check_in_time asc"
+#     )
+
+#     print(f"\n📋 Found {len(gps_entries)} GPS entries for {doc.employee}")
+
+#     if not gps_entries:
+#         return
+
+#     # Group by site
+#     site_entries = {}
+#     for entry in gps_entries:
+#         if not entry.site:
+#             continue
+#         site_entries.setdefault(entry.site, [])
+#         site_entries[entry.site].append(entry)
+
+#     total_overtime_amount = 0
+
+#     for site_name, entries in site_entries.items():
+#         try:
+#             site_doc = frappe.get_doc("Site", site_name)
+#         except frappe.DoesNotExistError:
+#             print(f"⚠️ Site '{site_name}' not found, skipping.")
+#             continue
+
+#         regular_limit = site_doc.get("regular_shifts") or 0
+#         rate_per_shift = site_doc.get("overtime_rate_per_shift") or 0
+
+#         print(f"\n🏢 Site: {site_name}")
+#         print(f"➡ Regular Limit: {regular_limit}, Rate/Shift: ₹{rate_per_shift}, Total Shifts: {len(entries)}")
+
+#         # Compute weighted shift count (half = 0.5)
+#         total_equivalent_shifts = 0
+#         for e in entries:
+#             shift_name = (e.shift_type or "").strip()
+#             is_half = 0
+#             if shift_name:
+#                 is_half = frappe.db.get_value("Shift Type", shift_name, "half_shift") or 0
+#             total_equivalent_shifts += 0.5 if is_half else 1
+
+#         print(f"🧮 Equivalent Shifts Worked: {total_equivalent_shifts}")
+
+#         if total_equivalent_shifts <= regular_limit:
+#             print("✅ No overtime for this site.")
+#             continue
+
+#         overtime_equiv = total_equivalent_shifts - regular_limit
+#         site_overtime = overtime_equiv * rate_per_shift
+
+#         print(f"💰 Overtime Equivalent: {overtime_equiv} × ₹{rate_per_shift} = ₹{site_overtime}\n")
+#         total_overtime_amount += site_overtime
+
+#     if total_overtime_amount > 0:
+#         existing_row = next((e for e in doc.earnings if e.salary_component == "Overtime"), None)
+#         if existing_row:
+#             existing_row.amount = total_overtime_amount
+#         else:
+#             doc.append("earnings", {
+#                 "salary_component": "Overtime",
+#                 "amount": total_overtime_amount
+#             })
+
+#         if hasattr(doc, "calculate_net_pay"):
+#             doc.calculate_net_pay()
+
+#         print(f"✅ Final Overtime Added: ₹{total_overtime_amount:.2f}")
+#         frappe.msgprint(f"💸 Auto Overtime Added: ₹{total_overtime_amount:.2f}", indicator="green")
+#     else:
+#         print("ℹ️ No overtime detected for this employee.")
+
 def add_overtime_from_gps(doc, method):
-    # Run only if both employee and dates are set
     if not doc.employee or not doc.start_date or not doc.end_date:
+        print("❌ Missing employee or date range — skipping overtime calculation.")
         return
 
-    # Get GPS check-ins for the salary period
+    # ✅ Only include Approved check-ins
+    valid_workflow_states = ["Approved(Guard)", "Approved(Supervisor)"]
+
     gps_entries = frappe.get_all(
         "GPS Check-in Request",
         filters={
             "employee": doc.employee,
+            "workflow_state": ["in", valid_workflow_states],
             "check_in_time": ["between", [
                 f"{doc.start_date} 00:00:00",
                 f"{doc.end_date} 23:59:59"
             ]]
         },
-        fields=["site", "check_in_time"]
+        fields=["site", "check_in_time", "shift_type", "workflow_state"],
+        order_by="check_in_time asc"
     )
 
+    print(f"\n📋 Found {len(gps_entries)} Approved GPS entries for {doc.employee}")
     if not gps_entries:
+        print("ℹ️ No approved GPS entries found. Skipping overtime calculation.")
         return
 
-    # Count shifts per site
-    site_counts = {}
+    # Group by site
+    site_entries = {}
     for entry in gps_entries:
         if not entry.site:
             continue
-        site_counts.setdefault(entry.site, 0)
-        site_counts[entry.site] += 1
+        site_entries.setdefault(entry.site, [])
+        site_entries[entry.site].append(entry)
 
-    overtime_amount = 0
+    total_overtime_amount = 0
 
-    for site_name, count in site_counts.items():
+    for site_name, entries in site_entries.items():
         try:
             site_doc = frappe.get_doc("Site", site_name)
         except frappe.DoesNotExistError:
+            print(f"⚠️ Site '{site_name}' not found, skipping.")
             continue
 
-        regular_limit = site_doc.regular_shifts or 0
-        rate_per_shift = site_doc.overtime_rate_per_shift or 0
+        regular_limit = site_doc.get("regular_shifts") or 0
+        rate_per_shift = site_doc.get("overtime_rate_per_shift") or 0
 
-        if count > regular_limit:
-            overtime_shifts = count - regular_limit
-            overtime_amount += overtime_shifts * rate_per_shift
+        print(f"\n🏢 Site: {site_name}")
+        print(f"➡ Regular Limit: {regular_limit}, Rate/Shift: ₹{rate_per_shift}, Total Approved Shifts: {len(entries)}")
 
-    # Add overtime component if amount > 0
-    if overtime_amount > 0:
-        # Check if Overtime already exists in earnings
-        exists = any(e.salary_component == "Overtime" for e in doc.earnings)
-        if not exists:
+        # Compute weighted shift count (half = 0.5)
+        total_equivalent_shifts = 0
+        for e in entries:
+            shift_name = (e.shift_type or "").strip()
+            is_half = 0
+            if shift_name:
+                is_half = frappe.db.get_value("Shift Type", shift_name, "half_shift") or 0
+            total_equivalent_shifts += 0.5 if is_half else 1
+
+        print(f"🧮 Equivalent Shifts Worked: {total_equivalent_shifts}")
+
+        if total_equivalent_shifts <= regular_limit:
+            print("✅ No overtime for this site.")
+            continue
+
+        overtime_equiv = total_equivalent_shifts - regular_limit
+        site_overtime = overtime_equiv * rate_per_shift
+
+        print(f"💰 Overtime Equivalent: {overtime_equiv} × ₹{rate_per_shift} = ₹{site_overtime}\n")
+        total_overtime_amount += site_overtime
+
+    if total_overtime_amount > 0:
+        existing_row = next((e for e in doc.earnings if e.salary_component == "Overtime"), None)
+        if existing_row:
+            existing_row.amount = total_overtime_amount
+        else:
             doc.append("earnings", {
                 "salary_component": "Overtime",
-                "amount": overtime_amount
+                "amount": total_overtime_amount
             })
 
-        # Recalculate salary totals
         if hasattr(doc, "calculate_net_pay"):
             doc.calculate_net_pay()
 
+        print(f"✅ Final Overtime Added: ₹{total_overtime_amount:.2f}")
+        frappe.msgprint(f"💸 Auto Overtime Added: ₹{total_overtime_amount:.2f}", indicator="green")
+    else:
+        print("ℹ️ No overtime detected for this employee.")
