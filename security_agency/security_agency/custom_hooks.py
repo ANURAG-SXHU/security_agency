@@ -292,7 +292,7 @@ def add_overtime_from_gps(doc, method):
             shift_name = (e.shift_type or "").strip()
             is_half = 0
             if shift_name:
-                is_half = frappe.db.get_value("Shift Type", shift_name, "half_shift") or 0
+                is_half = frappe.db.get_value("Shift Type", shift_name, "custom_half_shift") or 0
             total_equivalent_shifts += 0.5 if is_half else 1
 
         print(f"🧮 Equivalent Shifts Worked: {total_equivalent_shifts}")

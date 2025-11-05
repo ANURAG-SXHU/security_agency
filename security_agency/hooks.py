@@ -132,34 +132,18 @@ doc_events = {
 
 # fixed some errror
 
-
-
 permission_query_conditions = {
     "GPS Check-in Request": "security_agency.security_agency.doctype.gps_check_in_request.gps_check_in_request.get_permission_query_conditions",
+    "Check-In Request GPS": "security_agency.security_agency.doctype.check_in_request_gps.check_in_request_gps.get_permission_query_conditions",
     "Employee": "security_agency.security_agency.doctype.gps_check_in_request.gps_check_in_request.get_employee_permission_query_conditions",
     "Attendance": "security_agency.security_agency.doctype.gps_check_in_request.gps_check_in_request.get_attendance_permission_query_conditions"
 }
 
 has_permission = {
     "GPS Check-in Request": "security_agency.security_agency.doctype.gps_check_in_request.gps_check_in_request.has_permission",
+    "Check-In Request GPS": "security_agency.security_agency.doctype.check_in_request_gps.check_in_request_gps.has_permission",
     "Employee": "security_agency.security_agency.doctype.gps_check_in_request.gps_check_in_request.has_employee_permission",
     "Attendance": "security_agency.security_agency.doctype.gps_check_in_request.gps_check_in_request.has_attendance_permission"
-}
-
-#CHECKIN GPS
-permission_query_conditions = {
-    "Check-In Request GPS": "security_agency.security_agency.doctype.check_in_request_gps.check_in_request_gps.get_permission_query_conditions",
-    "Employee": "security_agency.security_agency.doctype.check_in_request_gps.check_in_request_gps.get_employee_permission_query_conditions",
-    "Attendance": "security_agency.security_agency.doctype.check_in_request_gps.check_in_request_gps.get_attendance_permission_query_conditions"
-}
-
-has_permission = {
-    "Check-In Request GPS": "security_agency.security_agency.doctype.check_in_request_gps.check_in_request_gps.has_permission",
-    "Employee": "security_agency.security_agency.doctype.check_in_request_gps.check_in_request_gps.has_employee_permission",
-    "Attendance": "security_agency.security_agency.doctype.check_in_request_gps.check_in_request_gps.has_attendance_permission"
-}
-override_whitelisted_methods = {
-    "security_agency.auth_callback": "security_agency.api.zoho.auth_callback"
 }
 
 

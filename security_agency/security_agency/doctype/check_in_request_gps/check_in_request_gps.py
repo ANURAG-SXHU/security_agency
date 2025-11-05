@@ -78,77 +78,77 @@ def create_attendance_for_employee(employee_id, attendance_datetime, ref_doctype
 
     frappe.msgprint(_("✅ Attendance created for {0} on {1}").format(employee_id, attendance_date))
 
-# ------------------------
-# Check-In Request GPS Permissions
-# ------------------------
+# # ------------------------
+# # Check-In Request GPS Permissions
+# # ------------------------
 
-def get_permission_query_conditions(user):
-    if not user:
-        user = frappe.session.user
+# def get_permission_query_conditions(user):
+#     if not user:
+#         user = frappe.session.user
 
-    if user in ["Administrator", "Admin"]:
-        return None
+#     if user in ["Administrator", "Admin", "Operation Manager"]:
+#         return None
 
-    emp_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
-    if not emp_id:
-        return "1=0"
+#     emp_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
+#     if not emp_id:
+#         return "1=0"
 
-    return (
-        f"`tabCheck-In Request GPS`.employee = '{emp_id}' "
-        f"OR `tabCheck-In Request GPS`.reporting_to = '{emp_id}'"
-    )
+#     return (
+#         f"`tabCheck-In Request GPS`.employee = '{emp_id}' "
+#         f"OR `tabCheck-In Request GPS`.reporting_to = '{emp_id}'"
+#     )
 
-def has_permission(doc, ptype, user):
-    if user in ["Administrator", "Admin"]:
-        return True
+# def has_permission(doc, ptype, user):
+#     if user in ["Administrator", "Admin", "Operation Manager"]:
+#         return True
 
-    emp_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
-    if not emp_id:
-        return False
+#     emp_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
+#     if not emp_id:
+#         return False
 
-    if ptype == "create":
-        return True  # allow employees or supervisors to create
+#     if ptype == "create":
+#         return True  # allow employees or supervisors to create
 
-    return doc.employee == emp_id or doc.reporting_to == emp_id
+#     return doc.employee == emp_id or doc.reporting_to == emp_id
 
-# ------------------------
-# Employee Permissions
-# ------------------------
+# # ------------------------
+# # Employee Permissions
+# # ------------------------
 
-def get_employee_permission_query_conditions(user):
-    if not user:
-        user = frappe.session.user
+# def get_employee_permission_query_conditions(user):
+#     if not user:
+#         user = frappe.session.user
 
-    if user in ["Administrator", "Admin"]:
-        return None
+#     if user in ["Administrator", "Admin", "Operation Manager"]:
+#         return None
 
-    emp_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
-    return f"`tabEmployee`.name = '{emp_id}'" if emp_id else "1=0"
+#     emp_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
+#     return f"`tabEmployee`.name = '{emp_id}'" if emp_id else "1=0"
 
-def has_employee_permission(doc, ptype, user):
-    if user in ["Administrator", "Admin"]:
-        return True
+# def has_employee_permission(doc, ptype, user):
+#     if user in ["Administrator", "Admin", "Operation Manager"]:
+#         return True
 
-    emp_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
-    return doc.name == emp_id
+#     emp_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
+#     return doc.name == emp_id
 
-# ------------------------
-# Attendance Permissions
-# ------------------------
+# # ------------------------
+# # Attendance Permissions
+# # ------------------------
 
-def get_attendance_permission_query_conditions(user):
-    if not user:
-        user = frappe.session.user
+# def get_attendance_permission_query_conditions(user):
+#     if not user:
+#         user = frappe.session.user
 
-    if user in ["Administrator", "Admin"]:
-        return None
+#     if user in ["Administrator", "Admin", "Operation Manager"]:
+#         return None
 
-    emp_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
-    return f"`tabAttendance`.employee = '{emp_id}'" if emp_id else "1=0"
+#     emp_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
+#     return f"`tabAttendance`.employee = '{emp_id}'" if emp_id else "1=0"
 
-def has_attendance_permission(doc, ptype, user):
-    if user in ["Administrator", "Admin"]:
-        return True
+# def has_attendance_permission(doc, ptype, user):
+#     if user in ["Administrator", "Admin", "Operation Manager"]:
+#         return True
 
-    emp_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
-    return doc.employee == emp_id
+#     emp_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
+#     return doc.employee == emp_id
