@@ -241,7 +241,7 @@ def create_attendance_for_employee(
 def get_permission_query_conditions(user):
     if not user:
         user = frappe.session.user
-    if user in ["Administrator", "Admin"]:
+    if user in ["Administrator", "Admin","Operation Manager"]:
         return None
 
     emp_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
@@ -255,7 +255,7 @@ def get_permission_query_conditions(user):
 
 
 def has_permission(doc, ptype, user):
-    if user in ["Administrator", "Admin"]:
+    if user in ["Administrator", "Admin","Operation Manager"]:
         return True
 
     emp_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
