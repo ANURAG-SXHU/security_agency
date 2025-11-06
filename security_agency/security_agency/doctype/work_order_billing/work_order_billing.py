@@ -14,6 +14,111 @@ class WorkOrderBilling(Document):
 
 
 
+# def calculate_job_rate_breakup(doc, method=None):
+#     percentage_lookup = {}
+
+#     frappe.logger().debug("🔍 Building percentage lookup from Charges Breakup table...")
+#     print("🔍 Building percentage lookup from Charges Breakup table...")
+
+#     for row in doc.rate_breakup:
+#         percentage_lookup[row.job_description] = {
+#             "leave_wages": float(row.leave_wages or 0),
+#             "national_and_festival_holidays": float(row.national_and_festival_holidays or 0),
+#             "epf": float(row.epf or 0),
+#             "esic": float(row.esic or 0),
+#             "reliver_charges": float(row.reliver_charges or 0),
+#             "service_charges": float(row.service_charges or 0),
+#             "total_days": int(row.total_days or 26),  # ✅ Fallback to 26 if empty
+#         }
+#         log_msg = f"✔️ {row.job_description} => {percentage_lookup[row.job_description]}"
+#         frappe.logger().debug(log_msg)
+#         print(log_msg)
+
+#     frappe.logger().debug("🚀 Starting calculations for each Job Rate row...")
+#     print("🚀 Starting calculations for each Job Rate row...")
+
+#     for row in doc.job_rate_details:
+#         desc = row.job_description
+
+#         if desc not in percentage_lookup:
+#             msg = f"⚠️ No rate breakup found for job description: {desc}"
+#             frappe.msgprint(msg)
+#             frappe.logger().debug(msg)
+#             print(msg)
+#             continue
+
+#         perc = percentage_lookup[desc]
+#         total_days = perc["total_days"]
+
+#         # ✅ Auto-calculate minimum_wages_per_month from rate_per_day
+#         if row.rate_per_day:
+#             row.minimum_wages_per_month = round(row.rate_per_day * total_days, 2)
+#             frappe.logger().debug(f"📌 Auto-calculated minimum_wages_per_month for '{desc}': {row.minimum_wages_per_month}")
+#             print(f"📌 Auto-calculated minimum_wages_per_month for '{desc}': {row.minimum_wages_per_month}")
+
+#         mw = float(row.minimum_wages_per_month or 0)
+
+#         if mw == 0:
+#             msg = f"❌ Minimum wage is 0 for job: {desc}. Skipping..."
+#             frappe.logger().debug(msg)
+#             print(msg)
+#             continue
+
+#         # 🧮 Apply updated formulas
+#         # leave = round((mw / total_days) * perc["leave_wages"]/12, 2)
+#         leave = round((mw / total_days) * (15.6 / 12), 2)
+#         # holiday = round((mw / total_days) * perc["national_and_festival_holidays"]/12, 2)
+#         holiday = round((mw / total_days) * (8 / 12), 2)
+#         wage = mw + leave + holiday
+#         epf = round((perc["epf"] / 100) * wage, 2)
+#         esic = round((perc["esic"] / 100) * wage, 2)
+#         gross = wage + epf + esic
+#         reliever = round(mw * (perc["reliver_charges"] / 100), 2)  # ✅ if you want percentage-based reliever
+#         service = round((gross * perc["service_charges"]) / 100, 2)
+#         total = gross + reliever + service
+
+#         # 🔄 Shift Multiplier Logic (Updated per_day calculation)
+#         shift_multiplier = int(row.number_of_shifts or 1)
+#         per_day = total * shift_multiplier
+
+#         # 🔎 Debug Values
+#         debug_data = {
+#             "Leave Wages": leave,
+#             "Holiday Wages": holiday,
+#             "Wages": wage,
+#             "EPF": epf,
+#             "ESIC": esic,
+#             "Gross Wages": gross,
+#             "Reliever Charges": reliever,
+#             "Service Charges": service,
+#             "Total Monthly Payable": total,
+#             "Total Per Day (Shifts Applied)": per_day
+#         }
+
+#         for key, val in debug_data.items():
+#             msg = f"{key}: {val:.2f}"
+#             frappe.logger().debug(msg)
+#             print(msg)
+
+#         # 📝 Set values in child row
+#         row.leave_wages = leave
+#         row.national_and_festival_holidays = holiday
+#         row.wages = wage
+#         row.epf = epf
+#         row.esic = esic
+#         row.statutory_benefit = round(epf + esic, 2)
+#         row.gross_wages = round(gross, 2)
+#         row.reliver_charges = reliever
+#         row.service_charges = service
+#         row.total_monthly_payable = round(total, 2)
+#         row.total_per_day = per_day
+
+#     # 🔁 Update total amount in parent doc
+#     doc.amount = sum([row.total_monthly_payable or 0 for row in doc.job_rate_details])
+#     final_msg = f"💰 Updated total amount on doc: {doc.amount}"
+#     frappe.logger().debug(final_msg)
+#     print(final_msg)
+
 def calculate_job_rate_breakup(doc, method=None):
     percentage_lookup = {}
 
@@ -26,13 +131,12 @@ def calculate_job_rate_breakup(doc, method=None):
             "national_and_festival_holidays": float(row.national_and_festival_holidays or 0),
             "epf": float(row.epf or 0),
             "esic": float(row.esic or 0),
-            "reliver_charges": float(row.reliver_charges or 0),
+            "reliver_charges": float(row.reliver_charges or 0),  # ✅ now direct multiplier
             "service_charges": float(row.service_charges or 0),
-            "total_days": int(row.total_days or 26),  # ✅ Fallback to 26 if empty
+            "total_days": int(row.total_days or 26),  # ✅ default 26
         }
-        log_msg = f"✔️ {row.job_description} => {percentage_lookup[row.job_description]}"
-        frappe.logger().debug(log_msg)
-        print(log_msg)
+        frappe.logger().debug(f"✔️ {row.job_description} => {percentage_lookup[row.job_description]}")
+        print(f"✔️ {row.job_description} => {percentage_lookup[row.job_description]}")
 
     frappe.logger().debug("🚀 Starting calculations for each Job Rate row...")
     print("🚀 Starting calculations for each Job Rate row...")
@@ -50,7 +154,7 @@ def calculate_job_rate_breakup(doc, method=None):
         perc = percentage_lookup[desc]
         total_days = perc["total_days"]
 
-        # ✅ Auto-calculate minimum_wages_per_month from rate_per_day
+        # ✅ Auto-calc MW from rate_per_day
         if row.rate_per_day:
             row.minimum_wages_per_month = round(row.rate_per_day * total_days, 2)
             frappe.logger().debug(f"📌 Auto-calculated minimum_wages_per_month for '{desc}': {row.minimum_wages_per_month}")
@@ -59,46 +163,30 @@ def calculate_job_rate_breakup(doc, method=None):
         mw = float(row.minimum_wages_per_month or 0)
 
         if mw == 0:
-            msg = f"❌ Minimum wage is 0 for job: {desc}. Skipping..."
-            frappe.logger().debug(msg)
-            print(msg)
+            frappe.logger().debug(f"❌ Minimum wage is 0 for job: {desc}. Skipping...")
+            print(f"❌ Minimum wage is 0 for job: {desc}. Skipping...")
             continue
 
-        # 🧮 Apply updated formulas
-        leave = round((mw / total_days) * perc["leave_wages"]/12, 2)
-        holiday = round((mw / total_days) * perc["national_and_festival_holidays"]/12, 2)
+        # ✅ Updated formulas
+        leave = round((mw / total_days) * (15.6 / 12), 2)
+        holiday = round((mw / total_days) * (8 / 12), 2)
+
         wage = mw + leave + holiday
         epf = round((perc["epf"] / 100) * wage, 2)
         esic = round((perc["esic"] / 100) * wage, 2)
         gross = wage + epf + esic
-        reliever = round(mw * (perc["reliver_charges"] / 100), 2)  # ✅ if you want percentage-based reliever
+
+        # ✅ UPDATED RELIEVER: Direct multiplier (NO percent division)
+        reliever = round(mw * perc["reliver_charges"], 2)
+
         service = round((gross * perc["service_charges"]) / 100, 2)
+
         total = gross + reliever + service
 
-        # 🔄 Shift Multiplier Logic (Updated per_day calculation)
         shift_multiplier = int(row.number_of_shifts or 1)
         per_day = total * shift_multiplier
 
-        # 🔎 Debug Values
-        debug_data = {
-            "Leave Wages": leave,
-            "Holiday Wages": holiday,
-            "Wages": wage,
-            "EPF": epf,
-            "ESIC": esic,
-            "Gross Wages": gross,
-            "Reliever Charges": reliever,
-            "Service Charges": service,
-            "Total Monthly Payable": total,
-            "Total Per Day (Shifts Applied)": per_day
-        }
-
-        for key, val in debug_data.items():
-            msg = f"{key}: {val:.2f}"
-            frappe.logger().debug(msg)
-            print(msg)
-
-        # 📝 Set values in child row
+        # 🧾 Assign values back to child row
         row.leave_wages = leave
         row.national_and_festival_holidays = holiday
         row.wages = wage
@@ -111,12 +199,10 @@ def calculate_job_rate_breakup(doc, method=None):
         row.total_monthly_payable = round(total, 2)
         row.total_per_day = per_day
 
-    # 🔁 Update total amount in parent doc
+    # ✅ Update parent total
     doc.amount = sum([row.total_monthly_payable or 0 for row in doc.job_rate_details])
-    final_msg = f"💰 Updated total amount on doc: {doc.amount}"
-    frappe.logger().debug(final_msg)
-    print(final_msg)
-
+    frappe.logger().debug(f"💰 Updated total amount on doc: {doc.amount}")
+    print(f"💰 Updated total amount on doc: {doc.amount}")
 
 # ---------------------- OpenAI Client ----------------------
 def get_openai_client():
