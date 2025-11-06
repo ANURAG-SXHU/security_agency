@@ -324,32 +324,33 @@ def my_auth_callback(code=None):
 #     return f"✅ Pushed to Zoho Books! Invoice ID: {invoice_id}, PDF: {pdf_url or 'Not available'}"
 
 
+
 @frappe.whitelist()
 def push_invoice_to_zoho(name):
     import json, time
 
     doc = frappe.get_doc("Work Order Billing", name)
 
-    # Step 1: Get Customer ID
+    # Step 1: Get Zoho Customer ID
     zoho_customer_id = frappe.db.get_value("Zoho Customer", doc.zoho_customer, "zoho_customer_id")
     if not zoho_customer_id:
         frappe.throw("No Zoho Customer linked to this Work Order Billing.")
 
-    # ✅ Correct GST Component Tax IDs
+    # ✅ CGST + State GST (OGST) component tax IDs
     CGST_ID = "2441536000000037039"   # CGST 9%
-    OGST_ID = "2441536000000037045"   # OGST (State GST) 9%
+    OGST_ID = "2441536000000037045"   # SGST/OGST 9%
 
-    # Step 2: Build line items
+    # Step 2: Build line items with correct tax field
     line_items = []
     for row in doc.invoice_lines:
         line_items.append({
             "name": row.description,
             "rate": float(row.rate),
             "quantity": float(row.quantity),
-            "tax_id": [CGST_ID, OGST_ID]   # ✅ Apply 9% CGST + 9% OGST
+            "tax_ids": [CGST_ID, OGST_ID]   # ✅ Correct field
         })
 
-    # Step 3: Build payload
+    # Step 3: Build invoice payload
     payload = {
         "customer_id": zoho_customer_id,
         "line_items": line_items,
@@ -359,7 +360,7 @@ def push_invoice_to_zoho(name):
 
     frappe.log_error(json.dumps(payload, indent=2), "🔍 Zoho Invoice Payload")
 
-    # Step 4: Setup config
+    # Step 4: API Setup
     settings = get_zoho_settings()
     access_token = get_access_token()
     org_id = settings.org_id
@@ -387,7 +388,7 @@ def push_invoice_to_zoho(name):
     invoice_id = data["invoice"]["invoice_id"]
     pdf_url = data["invoice"].get("pdf_url", "")
 
-    # Step 6: Conditionally generate PDF via email
+    # Step 6: Generate PDF if needed
     if not pdf_url and doc.send_invoice_email_to_generate_pdf:
         send_url = f"{api_domain}/books/v3/invoices/{invoice_id}/email?organization_id={org_id}"
         email_payload = {
@@ -399,11 +400,13 @@ def push_invoice_to_zoho(name):
         requests.post(send_url, headers=headers, json=email_payload)
         time.sleep(2)
 
-        # Fetch updated invoice to retrieve PDF URL
-        invoice_data = requests.get(f"{api_domain}/books/v3/invoices/{invoice_id}?organization_id={org_id}", headers=headers).json()
+        invoice_data = requests.get(
+            f"{api_domain}/books/v3/invoices/{invoice_id}?organization_id={org_id}",
+            headers=headers
+        ).json()
         pdf_url = invoice_data.get("invoice", {}).get("pdf_url", "")
 
-    # Step 8: Save to Work Order Billing
+    # Step 7: Save back to ERPNext
     doc.zoho_invoice_id = invoice_id
     doc.zoho_invoice_pdf_url = pdf_url
     doc.save(ignore_permissions=True)
