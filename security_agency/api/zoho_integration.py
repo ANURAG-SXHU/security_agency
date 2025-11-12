@@ -324,10 +324,10 @@ def my_auth_callback(code=None):
 #     return f"✅ Pushed to Zoho Books! Invoice ID: {invoice_id}, PDF: {pdf_url or 'Not available'}"
 
 
-
 @frappe.whitelist()
 def push_invoice_to_zoho(name):
     import json, time
+    import requests
 
     doc = frappe.get_doc("Work Order Billing", name)
 
@@ -336,23 +336,42 @@ def push_invoice_to_zoho(name):
     if not zoho_customer_id:
         frappe.throw("No Zoho Customer linked to this Work Order Billing.")
 
-    # ✅ CGST + State GST (OGST) component tax IDs
-    CGST_ID = "2441536000000037039"   # CGST 9%
-    OGST_ID = "2441536000000037045"   # SGST/OGST 9%
+    # Step 2: Fetch Zoho Customer info
+    zoho_customer = frappe.get_doc("Zoho Customer", doc.zoho_customer)
+    customer_state = (zoho_customer.place_of_supply or "").strip().upper()
 
-    # Step 2: Build line items with correct tax field
+    COMPANY_STATE = "OD"  # Your state code (Odisha)
+
+    # Tax component IDs
+    CGST_ID = "2441536000000037039"
+    OGST_ID = "2441536000000037045"
+    IGST_ID = "2441536000000030382"
+
+    # Account ID for revenue
+    ACCOUNT_ID = "2441536000000000486"
+
+    # Decide which tax ids to apply
+    if customer_state == COMPANY_STATE:
+        tax_ids_to_apply = [CGST_ID, IGST_ID]
+    else:
+        tax_ids_to_apply = [IGST_ID]
+
+    # Step 3: Build line items
     line_items = []
     for row in doc.invoice_lines:
         line_items.append({
-            "name": row.description,
+            "description": row.description,
             "rate": float(row.rate),
             "quantity": float(row.quantity),
-            "tax_ids": [CGST_ID, OGST_ID]   # ✅ Correct field
+            "account_id": ACCOUNT_ID,
+            "tax_ids": tax_ids_to_apply
         })
 
-    # Step 3: Build invoice payload
+    # Step 4: Build payload
     payload = {
         "customer_id": zoho_customer_id,
+        "place_of_supply": customer_state or COMPANY_STATE,
+        "gst_treatment": "business_gst",
         "line_items": line_items,
         "notes": doc.customer_notes or "",
         "terms": doc.terms_conditions or ""
@@ -360,7 +379,7 @@ def push_invoice_to_zoho(name):
 
     frappe.log_error(json.dumps(payload, indent=2), "🔍 Zoho Invoice Payload")
 
-    # Step 4: API Setup
+    # Step 5: Setup API call
     settings = get_zoho_settings()
     access_token = get_access_token()
     org_id = settings.org_id
@@ -369,9 +388,8 @@ def push_invoice_to_zoho(name):
     headers = {"Authorization": f"Zoho-oauthtoken {access_token}"}
     create_url = f"{api_domain}/books/v3/invoices?organization_id={org_id}"
 
-    # Step 5: Create invoice
+    # Step 6: Create invoice
     res = requests.post(create_url, headers=headers, json=payload)
-
     if res.status_code == 401:
         access_token = refresh_access_token()
         headers["Authorization"] = f"Zoho-oauthtoken {access_token}"
@@ -388,25 +406,7 @@ def push_invoice_to_zoho(name):
     invoice_id = data["invoice"]["invoice_id"]
     pdf_url = data["invoice"].get("pdf_url", "")
 
-    # Step 6: Generate PDF if needed
-    if not pdf_url and doc.send_invoice_email_to_generate_pdf:
-        send_url = f"{api_domain}/books/v3/invoices/{invoice_id}/email?organization_id={org_id}"
-        email_payload = {
-            "send_from_org_email_id": True,
-            "to_mail_ids": [frappe.db.get_value("Zoho Customer", doc.zoho_customer, "email") or "dummy@example.com"],
-            "subject": "Invoice from your vendor",
-            "body": "Please find the invoice attached."
-        }
-        requests.post(send_url, headers=headers, json=email_payload)
-        time.sleep(2)
-
-        invoice_data = requests.get(
-            f"{api_domain}/books/v3/invoices/{invoice_id}?organization_id={org_id}",
-            headers=headers
-        ).json()
-        pdf_url = invoice_data.get("invoice", {}).get("pdf_url", "")
-
-    # Step 7: Save back to ERPNext
+    # Step 7: Save results
     doc.zoho_invoice_id = invoice_id
     doc.zoho_invoice_pdf_url = pdf_url
     doc.save(ignore_permissions=True)
