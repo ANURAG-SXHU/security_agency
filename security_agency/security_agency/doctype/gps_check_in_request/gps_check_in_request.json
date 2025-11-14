@@ -128,6 +128,7 @@
   {
    "fieldname": "shift_type",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Shift Type",
    "options": "Shift Type"
   },
@@ -141,7 +142,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-29 22:29:04.285016",
+ "modified": "2025-11-14 12:30:25.104501",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "GPS Check-in Request",
