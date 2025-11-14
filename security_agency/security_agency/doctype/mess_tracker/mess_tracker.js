@@ -116,12 +116,15 @@ frappe.ui.form.on('Mess Tracker', {
             return;
         }
 
-        // 🔥 MOBILE SAFE SAVE API
+        // 🔥 MOBILE + DESKTOP SAFE SAVE (FRAPPE v14/v15 compatible)
         frappe.call({
             method: "frappe.desk.form.save.savedocs",
             args: {
-                docs: frm.doc
+                doc: frm.doc,     // required parameter
+                action: "Save"    // required parameter
             },
+            freeze: true,
+            freeze_message: "Saving document & fetching guards...",
             callback: function() {
 
                 // NOW FETCH GUARDS
@@ -135,6 +138,8 @@ frappe.ui.form.on('Mess Tracker', {
                         },
                         fields: ["name", "employee_name"]
                     },
+                    freeze: true,
+                    freeze_message: "Loading guards...",
                     callback: function(r) {
 
                         frm.clear_table("deduction_table");
