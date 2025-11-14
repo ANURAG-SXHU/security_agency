@@ -110,40 +110,47 @@ frappe.ui.form.on('Mess Tracker', {
 
     // ▶ When user clicks "Get Guards" button
     get_guards: function(frm) {
+
         if (!frm.doc.reports_to) {
             frappe.msgprint("Please select a Reports To first.");
             return;
         }
 
-        frappe.call({
-            method: "frappe.client.get_list",
-            args: {
-                doctype: "Employee",
-                filters: {
-                    reports_to: frm.doc.reports_to,
-                    site: frm.doc.site || undefined   // only if site is used
+        // SAVE FIRST, THEN FETCH
+        frm.save().then(() => {
+
+            frappe.call({
+                method: "frappe.client.get_list",
+                args: {
+                    doctype: "Employee",
+                    filters: {
+                        reports_to: frm.doc.reports_to,
+                        site: frm.doc.site || undefined
+                    },
+                    fields: ["name", "employee_name"]
                 },
-                fields: ["name", "employee_name"]
-            },
-            callback: function(r) {
-                frm.clear_table("deduction_table");
+                callback: function(r) {
 
-                if (r.message) {
-                    r.message.forEach(emp => {
-                        let row = frm.add_child("deduction_table");
-                        row.employee = emp.name;
-                        row.employee_name = emp.employee_name;
-                        row.amount_to_deduct = 0;
-                    });
+                    frm.clear_table("deduction_table");
 
-                    frm.refresh_field("deduction_table");
-                    distribute_amount(frm);   // auto distribute
+                    if (r.message) {
+                        r.message.forEach(emp => {
+                            let row = frm.add_child("deduction_table");
+                            row.employee = emp.name;
+                            row.employee_name = emp.employee_name;
+                            row.amount_to_deduct = 0;
+                        });
+
+                        frm.refresh_field("deduction_table");
+                        distribute_amount(frm);
+                    }
                 }
-            }
+            });
+
         });
     },
 
-    // Recalculate on field change
+    // Trigger auto distribution
     total_amount: function(frm) { distribute_amount(frm); },
     distribute_mode: function(frm) { distribute_amount(frm); },
     month: function(frm) { distribute_amount(frm); }
@@ -152,11 +159,10 @@ frappe.ui.form.on('Mess Tracker', {
 
 
 // -----------------------------------------
-// Helper function for Auto Distribution
+// Helper: Auto Distribution
 // -----------------------------------------
 function distribute_amount(frm) {
     if (!frm.doc.distribute_mode || frm.doc.distribute_mode === 'Manual') return;
-
     if (!frm.doc.total_amount || frm.doc.total_amount <= 0) return;
 
     const rows = frm.doc.deduction_table || [];
