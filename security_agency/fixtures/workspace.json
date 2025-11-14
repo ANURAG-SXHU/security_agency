@@ -19511,7 +19511,7 @@
  },
  {
   "charts": [],
-  "content": "[{\"id\":\"kzm2bvi8I7\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Payroll Module</span>\",\"col\":12}},{\"id\":\"Uc6SYD-otD\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salary Component\",\"col\":3}},{\"id\":\"LmmUdlaUjA\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salary Structure\",\"col\":3}},{\"id\":\"uCjtYaXAEC\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salary Structure Assignment\",\"col\":3}},{\"id\":\"msNcnOYM5c\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Bulk Salary Structure Assignment\",\"col\":3}},{\"id\":\"ZlsbQ6jB21\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Joining Fee Tracker\",\"col\":3}},{\"id\":\"qjiktAeeId\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salary Slips\",\"col\":3}},{\"id\":\"yL7mdJbBAF\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Employee Advance Request\",\"col\":3}},{\"id\":\"qUokpOgUAr\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mess Tracker\",\"col\":3}},{\"id\":\"gYXJYkRM2n\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Bulk Site Salary Slip Tool\",\"col\":3}}]",
+  "content": "[{\"id\":\"kzm2bvi8I7\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Payroll Module</span>\",\"col\":12}},{\"id\":\"Uc6SYD-otD\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salary Component\",\"col\":3}},{\"id\":\"LmmUdlaUjA\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salary Structure\",\"col\":3}},{\"id\":\"uCjtYaXAEC\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salary Structure Assignment\",\"col\":3}},{\"id\":\"msNcnOYM5c\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Bulk Salary Structure Assignment\",\"col\":3}},{\"id\":\"ZlsbQ6jB21\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Joining Fee Tracker\",\"col\":3}},{\"id\":\"qjiktAeeId\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salary Slips\",\"col\":3}},{\"id\":\"yL7mdJbBAF\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Employee Advance Request\",\"col\":3}},{\"id\":\"qUokpOgUAr\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mess Tracker\",\"col\":3}},{\"id\":\"gYXJYkRM2n\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Bulk Site Salary Slip Tool\",\"col\":3}},{\"id\":\"Ze15rJMTKw\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Salary Slips Report\",\"col\":3}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -19522,7 +19522,7 @@
   "is_hidden": 0,
   "label": "Payroll Module",
   "links": [],
-  "modified": "2025-09-28 02:26:44.196045",
+  "modified": "2025-11-06 11:35:06.441723",
   "module": null,
   "name": "Payroll Module",
   "number_cards": [],
@@ -19533,6 +19533,23 @@
   "roles": [],
   "sequence_id": 40.0,
   "shortcuts": [
+   {
+    "color": "Grey",
+    "doc_view": "List",
+    "format": null,
+    "icon": null,
+    "kanban_board": null,
+    "label": "Salary Slips Report",
+    "link_to": "Salary Slip with Bank Details 1",
+    "parent": "Payroll Module",
+    "parentfield": "shortcuts",
+    "parenttype": "Workspace",
+    "report_ref_doctype": "Salary Slip",
+    "restrict_to_domain": null,
+    "stats_filter": null,
+    "type": "Report",
+    "url": null
+   },
    {
     "color": "Grey",
     "doc_view": "List",

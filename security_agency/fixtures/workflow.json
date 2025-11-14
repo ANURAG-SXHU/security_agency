@@ -4,7 +4,7 @@
   "doctype": "Workflow",
   "document_type": "GPS Check-in Request",
   "is_active": 1,
-  "modified": "2025-06-26 18:49:13.172982",
+  "modified": "2025-11-14 10:45:26.417295",
   "name": "GPS Check-IN Workflow",
   "override_status": 0,
   "send_email_alert": 0,
@@ -136,6 +136,38 @@
     "update_field": null,
     "update_value": null,
     "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Supervisor",
+    "avoid_status_override": 0,
+    "doc_status": "2",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "GPS Check-IN Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 1,
+    "state": "Cancel",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Field Officer",
+    "avoid_status_override": 0,
+    "doc_status": "2",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "GPS Check-IN Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 1,
+    "state": "Cancel",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
    }
   ],
   "transitions": [
@@ -216,6 +248,32 @@
     "send_email_to_creator": 0,
     "state": "Pending(Field Officer)",
     "workflow_builder_id": null
+   },
+   {
+    "action": "Cancel",
+    "allow_self_approval": 1,
+    "allowed": "Supervisor",
+    "condition": null,
+    "next_state": "Cancel",
+    "parent": "GPS Check-IN Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Approved(Guard)",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Cancel",
+    "allow_self_approval": 1,
+    "allowed": "Field Officer",
+    "condition": null,
+    "next_state": "Cancel",
+    "parent": "GPS Check-IN Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Approved(Supervisor)",
+    "workflow_builder_id": null
    }
   ],
   "workflow_data": null,
@@ -227,7 +285,7 @@
   "doctype": "Workflow",
   "document_type": "Check-In Request GPS",
   "is_active": 1,
-  "modified": "2025-06-28 17:00:41.504132",
+  "modified": "2025-11-14 10:42:30.362530",
   "name": "Check-IN Workflow",
   "override_status": 0,
   "send_email_alert": 0,
@@ -359,6 +417,38 @@
     "update_field": null,
     "update_value": null,
     "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Supervisor",
+    "avoid_status_override": 0,
+    "doc_status": "2",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Check-IN Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 1,
+    "state": "Cancel",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Field Officer",
+    "avoid_status_override": 0,
+    "doc_status": "2",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Check-IN Workflow",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "send_email": 1,
+    "state": "Cancel",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
    }
   ],
   "transitions": [
@@ -438,6 +528,32 @@
     "parenttype": "Workflow",
     "send_email_to_creator": 0,
     "state": "Pending(Field Officer)",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Cancel",
+    "allow_self_approval": 1,
+    "allowed": "Supervisor",
+    "condition": null,
+    "next_state": "Cancel",
+    "parent": "Check-IN Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Approved(Guard)",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Cancel",
+    "allow_self_approval": 1,
+    "allowed": "Field Officer",
+    "condition": null,
+    "next_state": "Cancel",
+    "parent": "Check-IN Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "send_email_to_creator": 0,
+    "state": "Approved(Supervisor)",
     "workflow_builder_id": null
    }
   ],
