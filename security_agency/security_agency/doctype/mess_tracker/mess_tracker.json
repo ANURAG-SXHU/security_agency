@@ -8,6 +8,7 @@
   "reports_to",
   "month",
   "total_amount",
+  "get_guards",
   "column_break_rmgf",
   "distribute_mode",
   "site",
@@ -72,13 +73,18 @@
    "fieldtype": "Link",
    "label": "Site",
    "options": "Site"
+  },
+  {
+   "fieldname": "get_guards",
+   "fieldtype": "Button",
+   "label": "Get Guards"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-10 11:17:30.357106",
+ "modified": "2025-11-14 11:09:40.572931",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "Mess Tracker",
