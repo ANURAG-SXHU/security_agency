@@ -1,0 +1,123 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-29 11:25:14.340791",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "site",
+  "date",
+  "column_break_npsi",
+  "original_guard",
+  "original_planned_shift",
+  "section_break_jlku",
+  "reason",
+  "column_break_ayvu",
+  "status",
+  "remarks",
+  "section_break_wpvb",
+  "shift_adjustment_assignment",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "site",
+   "fieldtype": "Link",
+   "label": "Site",
+   "options": "Site"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "column_break_npsi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "original_guard",
+   "fieldtype": "Link",
+   "label": "Original Guard",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "original_planned_shift",
+   "fieldtype": "Link",
+   "label": "Original Planned Shift",
+   "options": "Shift Type"
+  },
+  {
+   "fieldname": "section_break_jlku",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Select",
+   "label": "Reason",
+   "options": "\nAbsent\nLate\nEmergency"
+  },
+  {
+   "fieldname": "column_break_ayvu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nApproved"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "section_break_wpvb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "shift_adjustment_assignment",
+   "fieldtype": "Table",
+   "label": "Shift Adjustment Assignment",
+   "options": "Shift Adjustment Assignment"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Shift Adjustment",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-12-29 12:21:03.028737",
+ "modified_by": "Administrator",
+ "module": "Security Agency",
+ "name": "Shift Adjustment",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

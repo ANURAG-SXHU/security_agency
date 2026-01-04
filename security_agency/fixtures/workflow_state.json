@@ -1,0 +1,182 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "question-sign",
+  "modified": "2025-06-16 22:01:36.629610",
+  "name": "Pending",
+  "style": "",
+  "workflow_state_name": "Pending"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "remove",
+  "modified": "2025-06-16 22:01:36.633667",
+  "name": "Rejected",
+  "style": "Danger",
+  "workflow_state_name": "Rejected"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-06-22 21:39:24.567673",
+  "name": "Draft(Guard)",
+  "style": "",
+  "workflow_state_name": "Draft(Guard)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-06-22 21:39:37.029530",
+  "name": "Draft(Supervisor)",
+  "style": "",
+  "workflow_state_name": "Draft(Supervisor)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-06-22 21:42:17.563986",
+  "name": "Rejected(Guard)",
+  "style": "",
+  "workflow_state_name": "Rejected(Guard)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-06-28 19:10:55.506573",
+  "name": "Pending(HR)",
+  "style": "",
+  "workflow_state_name": "Pending(HR)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-06-28 19:17:06.455929",
+  "name": "Pending By Field Officer",
+  "style": "",
+  "workflow_state_name": "Pending By Field Officer"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-06-28 19:17:52.094956",
+  "name": "Approved By HR",
+  "style": "",
+  "workflow_state_name": "Approved By HR"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-06-28 19:18:19.676853",
+  "name": "Rejected By HR",
+  "style": "",
+  "workflow_state_name": "Rejected By HR"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "ok-sign",
+  "modified": "2025-06-16 22:01:36.631909",
+  "name": "Approved",
+  "style": "Success",
+  "workflow_state_name": "Approved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-06-22 21:41:32.339068",
+  "name": "Approved(Supervisor)",
+  "style": "",
+  "workflow_state_name": "Approved(Supervisor)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-06-28 19:17:38.229596",
+  "name": "Approved By Field Officer",
+  "style": "",
+  "workflow_state_name": "Approved By Field Officer"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-06-28 19:18:08.254461",
+  "name": "Rejected By Field Officer",
+  "style": "",
+  "workflow_state_name": "Rejected By Field Officer"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-06-28 19:17:22.199649",
+  "name": "Pending By HR",
+  "style": "",
+  "workflow_state_name": "Pending By HR"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-07-27 11:04:42.867218",
+  "name": "Cancel",
+  "style": "",
+  "workflow_state_name": "Cancel"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-06-22 21:36:09.369817",
+  "name": "Draft",
+  "style": "",
+  "workflow_state_name": "Draft"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-06-22 21:42:32.343118",
+  "name": "Rejected(Supervisor)",
+  "style": "",
+  "workflow_state_name": "Rejected(Supervisor)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-06-22 21:40:05.535321",
+  "name": "Pending(Field Officer)",
+  "style": "",
+  "workflow_state_name": "Pending(Field Officer)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-06-22 21:39:51.166192",
+  "name": "Pending(Supervisor)",
+  "style": "",
+  "workflow_state_name": "Pending(Supervisor)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-06-22 21:41:18.538078",
+  "name": "Approved(Guard)",
+  "style": "",
+  "workflow_state_name": "Approved(Guard)"
+ }
+]

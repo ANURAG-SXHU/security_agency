@@ -1,0 +1,50 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-29 11:30:10.925611",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "replacement_guard",
+  "shift_type",
+  "is_half_shift"
+ ],
+ "fields": [
+  {
+   "fieldname": "replacement_guard",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Replacement Guard",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "shift_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Shift Type",
+   "options": "Shift Type"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_half_shift",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Half Shift"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-29 11:53:27.077351",
+ "modified_by": "Administrator",
+ "module": "Security Agency",
+ "name": "Shift Adjustment Assignment",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

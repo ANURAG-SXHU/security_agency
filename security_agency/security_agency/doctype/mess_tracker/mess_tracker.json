@@ -1,0 +1,113 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{site}-{YYYY}{MM}-{####}",
+ "creation": "2025-06-28 21:09:18.400091",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "reports_to",
+  "month",
+  "total_amount",
+  "get_guards",
+  "column_break_rmgf",
+  "distribute_mode",
+  "site",
+  "section_break_eugw",
+  "deduction_table",
+  "section_break_jpzt",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_jpzt",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Mess Tracker",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "reports_to",
+   "fieldtype": "Link",
+   "label": "Reports To",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "month",
+   "fieldtype": "Date",
+   "label": "Month"
+  },
+  {
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "label": "Total Amount"
+  },
+  {
+   "fieldname": "column_break_rmgf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "distribute_mode",
+   "fieldtype": "Select",
+   "label": "Distribute Mode",
+   "options": "\nEqual\nManual"
+  },
+  {
+   "fieldname": "section_break_eugw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "deduction_table",
+   "fieldtype": "Table",
+   "label": "Deduction Table",
+   "options": "Mess Deduction Detail"
+  },
+  {
+   "fieldname": "site",
+   "fieldtype": "Link",
+   "label": "Site",
+   "options": "Site"
+  },
+  {
+   "fieldname": "get_guards",
+   "fieldtype": "Button",
+   "label": "Get Guards"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-11-14 11:59:13.459591",
+ "modified_by": "Administrator",
+ "module": "Security Agency",
+ "name": "Mess Tracker",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

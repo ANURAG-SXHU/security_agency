@@ -1,0 +1,95 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "JFT-.YYYY.-.MM.-.#####",
+ "creation": "2025-06-25 10:14:20.483529",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "number_of_months",
+  "amount_paid",
+  "column_break_pwdb",
+  "total_fee",
+  "start_month",
+  "monthly_emi",
+  "section_break_qnox",
+  "balance"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "total_fee",
+   "fieldtype": "Currency",
+   "label": "Total Fee"
+  },
+  {
+   "fieldname": "number_of_months",
+   "fieldtype": "Int",
+   "label": "Number of Months"
+  },
+  {
+   "fieldname": "monthly_emi",
+   "fieldtype": "Currency",
+   "label": "Monthly EMI",
+   "read_only": 1
+  },
+  {
+   "fieldname": "start_month",
+   "fieldtype": "Date",
+   "label": "Start Month"
+  },
+  {
+   "fieldname": "amount_paid",
+   "fieldtype": "Currency",
+   "label": "Amount Paid",
+   "read_only": 1
+  },
+  {
+   "fieldname": "balance",
+   "fieldtype": "Currency",
+   "label": "Balance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_pwdb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_qnox",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-06-26 15:28:44.714184",
+ "modified_by": "Administrator",
+ "module": "Security Agency",
+ "name": "Joining Fee Tracker",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

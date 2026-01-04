@@ -1,0 +1,128 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-08 13:06:02.646272",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "job_description",
+  "rate_per_day",
+  "wages_and_statutory_benefit_section",
+  "minimum_wages_per_month",
+  "leave_wages",
+  "national_and_festival_holidays",
+  "wages",
+  "column_break_hvwe",
+  "epf",
+  "esic",
+  "statutory_benefit",
+  "section_break_ivvx",
+  "gross_wages",
+  "reliver_charges",
+  "service_charges",
+  "total_monthly_payable",
+  "total_per_day"
+ ],
+ "fields": [
+  {
+   "fieldname": "job_description",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Job Description"
+  },
+  {
+   "fieldname": "rate_per_day",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Rate Per Day"
+  },
+  {
+   "fieldname": "wages_and_statutory_benefit_section",
+   "fieldtype": "Section Break",
+   "label": "Wages And Statutory Benefit"
+  },
+  {
+   "fieldname": "minimum_wages_per_month",
+   "fieldtype": "Data",
+   "label": "Minimum Wages per Month"
+  },
+  {
+   "fieldname": "leave_wages",
+   "fieldtype": "Data",
+   "label": "Leave Wages"
+  },
+  {
+   "fieldname": "national_and_festival_holidays",
+   "fieldtype": "Data",
+   "label": "National and Festival Holidays"
+  },
+  {
+   "fieldname": "wages",
+   "fieldtype": "Data",
+   "label": "Wages"
+  },
+  {
+   "fieldname": "column_break_hvwe",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "epf",
+   "fieldtype": "Data",
+   "label": "EPF"
+  },
+  {
+   "fieldname": "esic",
+   "fieldtype": "Data",
+   "label": "ESIC"
+  },
+  {
+   "fieldname": "statutory_benefit",
+   "fieldtype": "Data",
+   "label": "Statutory Benefit"
+  },
+  {
+   "fieldname": "section_break_ivvx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "gross_wages",
+   "fieldtype": "Data",
+   "label": "Gross Wages"
+  },
+  {
+   "fieldname": "reliver_charges",
+   "fieldtype": "Currency",
+   "label": "Reliver Charges"
+  },
+  {
+   "fieldname": "service_charges",
+   "fieldtype": "Currency",
+   "label": "Service Charges"
+  },
+  {
+   "fieldname": "total_monthly_payable",
+   "fieldtype": "Currency",
+   "label": "Total Monthly Payable "
+  },
+  {
+   "fieldname": "total_per_day",
+   "fieldtype": "Currency",
+   "label": "Total Per Day"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-21 23:30:40.303859",
+ "modified_by": "Administrator",
+ "module": "Security Agency",
+ "name": "Job Rate Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,222 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-06-29 11:23:19.157984",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "tender_title",
+  "upload_date",
+  "column_break_spsz",
+  "tender_pdf",
+  "section_break_elon",
+  "extract_summary",
+  "section_break_qnzk",
+  "basic_details",
+  "fee_and_security",
+  "text_editor_chcp",
+  "scope_of_work",
+  "required_documents",
+  "eligibility_criteria",
+  "important_dates",
+  "section_break_mdse",
+  "submission_date",
+  "emd_deadline",
+  "column_break_bpir",
+  "pre_bid_date",
+  "emd_reminded",
+  "pre_bid_reminded",
+  "submission_reminded",
+  "scope_summery_tab",
+  "scope_summary",
+  "ask_ai_for_rate",
+  "cost_justification",
+  "suggested_rate",
+  "tab_2_tab",
+  "manual_ai_prompt",
+  "run_prompt",
+  "ai_response"
+ ],
+ "fields": [
+  {
+   "fieldname": "tender_title",
+   "fieldtype": "Data",
+   "label": "Tender Title"
+  },
+  {
+   "fieldname": "upload_date",
+   "fieldtype": "Date",
+   "label": "Upload Date"
+  },
+  {
+   "fieldname": "column_break_spsz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tender_pdf",
+   "fieldtype": "Attach",
+   "label": "Tender PDF"
+  },
+  {
+   "fieldname": "scope_of_work",
+   "fieldtype": "Text Editor",
+   "label": "Scope of Work"
+  },
+  {
+   "fieldname": "required_documents",
+   "fieldtype": "Text Editor",
+   "label": "Required Documents"
+  },
+  {
+   "fieldname": "eligibility_criteria",
+   "fieldtype": "Text Editor",
+   "label": "Eligibility Criteria"
+  },
+  {
+   "fieldname": "scope_summary",
+   "fieldtype": "Long Text",
+   "label": "Scope Summary"
+  },
+  {
+   "fieldname": "suggested_rate",
+   "fieldtype": "Currency",
+   "label": "Suggested Rate"
+  },
+  {
+   "fieldname": "cost_justification",
+   "fieldtype": "Long Text",
+   "label": "Cost Justification"
+  },
+  {
+   "fieldname": "section_break_mdse",
+   "fieldtype": "Section Break",
+   "label": "Important Dates"
+  },
+  {
+   "fieldname": "submission_date",
+   "fieldtype": "Date",
+   "label": "Submission Date"
+  },
+  {
+   "fieldname": "emd_deadline",
+   "fieldtype": "Date",
+   "label": "EMD Deadline"
+  },
+  {
+   "fieldname": "column_break_bpir",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pre_bid_date",
+   "fieldtype": "Date",
+   "label": "Pre Bid Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "emd_reminded",
+   "fieldtype": "Check",
+   "label": "EMD Reminded"
+  },
+  {
+   "default": "0",
+   "fieldname": "pre_bid_reminded",
+   "fieldtype": "Check",
+   "label": "Pre Bid Reminded"
+  },
+  {
+   "default": "0",
+   "fieldname": "submission_reminded",
+   "fieldtype": "Check",
+   "label": "Submission Reminded"
+  },
+  {
+   "fieldname": "tab_2_tab",
+   "fieldtype": "Tab Break",
+   "label": "AI"
+  },
+  {
+   "fieldname": "extract_summary",
+   "fieldtype": "Button",
+   "label": "Extract Summary"
+  },
+  {
+   "fieldname": "ask_ai_for_rate",
+   "fieldtype": "Button",
+   "label": "Ask Ai For Rate"
+  },
+  {
+   "fieldname": "manual_ai_prompt",
+   "fieldtype": "Long Text",
+   "label": "Manual AI Prompt"
+  },
+  {
+   "fieldname": "ai_response",
+   "fieldtype": "Text Editor",
+   "label": "AI Response"
+  },
+  {
+   "fieldname": "run_prompt",
+   "fieldtype": "Button",
+   "label": "Run Prompt"
+  },
+  {
+   "fieldname": "section_break_elon",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_qnzk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "scope_summery_tab",
+   "fieldtype": "Tab Break",
+   "label": "Scope Summery"
+  },
+  {
+   "fieldname": "important_dates",
+   "fieldtype": "Long Text",
+   "label": "Important Dates"
+  },
+  {
+   "fieldname": "basic_details",
+   "fieldtype": "Text Editor",
+   "label": "Basic Details"
+  },
+  {
+   "fieldname": "fee_and_security",
+   "fieldtype": "Text Editor",
+   "label": "Fee and Security"
+  },
+  {
+   "fieldname": "text_editor_chcp",
+   "fieldtype": "Text Editor",
+   "label": "Technical Bid Evalution"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-08-16 14:31:57.204702",
+ "modified_by": "Administrator",
+ "module": "Security Agency",
+ "name": "Tender",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

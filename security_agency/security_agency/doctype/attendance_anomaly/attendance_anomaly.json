@@ -1,0 +1,82 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "AANOM-.YYYY.-.#####",
+ "creation": "2025-07-14 09:10:04.700433",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "site",
+  "column_break_xixl",
+  "date",
+  "section_break_lgku",
+  "absentee_count",
+  "guard",
+  "type"
+ ],
+ "fields": [
+  {
+   "fieldname": "site",
+   "fieldtype": "Link",
+   "label": "Site",
+   "options": "Site"
+  },
+  {
+   "fieldname": "column_break_xixl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "section_break_lgku",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "absentee_count",
+   "fieldtype": "Int",
+   "label": "Absentee Count"
+  },
+  {
+   "fieldname": "guard",
+   "fieldtype": "Link",
+   "label": "Guard",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "\nSite Anomaly\nNo Check-ins"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-07-27 10:51:30.432675",
+ "modified_by": "Administrator",
+ "module": "Security Agency",
+ "name": "Attendance Anomaly",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

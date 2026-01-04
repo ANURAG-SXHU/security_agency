@@ -1,0 +1,57 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-07 23:53:01.891193",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "field_officer",
+  "date",
+  "visits"
+ ],
+ "fields": [
+  {
+   "fieldname": "field_officer",
+   "fieldtype": "Link",
+   "label": "Field Officer",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "visits",
+   "fieldtype": "Table",
+   "label": "Visits",
+   "options": "Planned Visit Location"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-07-07 23:54:24.592513",
+ "modified_by": "Administrator",
+ "module": "Security Agency",
+ "name": "Planned Visit",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

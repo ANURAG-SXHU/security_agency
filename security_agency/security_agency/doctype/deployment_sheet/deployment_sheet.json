@@ -1,0 +1,89 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "DEP-.YYYY.-WK-.WW.-.####",
+ "creation": "2025-07-14 09:04:35.540713",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "week_start_date",
+  "month",
+  "rotate_shifts",
+  "column_break_khde",
+  "week_end_date",
+  "year",
+  "section_break_lrkv",
+  "deployment_lines"
+ ],
+ "fields": [
+  {
+   "fieldname": "week_start_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Week Start Date"
+  },
+  {
+   "fieldname": "column_break_khde",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "week_end_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Week End Date"
+  },
+  {
+   "fieldname": "section_break_lrkv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "deployment_lines",
+   "fieldtype": "Table",
+   "label": "Deployment Lines",
+   "options": "Deployment Line"
+  },
+  {
+   "fieldname": "month",
+   "fieldtype": "Select",
+   "label": "Month",
+   "options": "\nJanuary\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
+  },
+  {
+   "fieldname": "year",
+   "fieldtype": "Date",
+   "label": "Year"
+  },
+  {
+   "fieldname": "rotate_shifts",
+   "fieldtype": "Button",
+   "label": "Rotate Shifts"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-15 15:30:11.937810",
+ "modified_by": "Administrator",
+ "module": "Security Agency",
+ "name": "Deployment Sheet",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

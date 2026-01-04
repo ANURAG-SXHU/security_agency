@@ -1,0 +1,72 @@
+<div class="container my-4">
+
+    <h2>GPS Check-in Dashboard</h2>
+
+    <!-- 🔥 Filters Row -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <label for="filter_site"><strong>Site</strong></label>
+            <select id="filter_site" class="form-control">
+                <option value="">All Sites</option>
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label for="filter_date"><strong>Date</strong></label>
+            <input type="date" id="filter_date" class="form-control">
+        </div>
+
+        <div class="col-md-4">
+            <label>&nbsp;</label>
+            <button id="apply_filters" class="btn btn-primary btn-block">
+                Apply Filters
+            </button>
+        </div>
+    </div>
+
+    <!-- 🔥 KPI Section -->
+    <div class="row text-center mb-4">
+        <div class="col-md-3">
+            <div class="card p-3 shadow">
+                <h5>Total Check-ins</h5>
+                <h3 id="total_today">0</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3 shadow">
+                <h5>Pending</h5>
+                <h3 id="pending">0</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3 shadow">
+                <h5>Approved</h5>
+                <h3 id="approved">0</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3 shadow">
+                <h5>Rejected</h5>
+                <h3 id="rejected">0</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔥 Charts Row -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card p-3 shadow">
+                <h5>Check-ins by Site (Last 7 Days)</h5>
+                <canvas id="chart_by_site"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card p-3 shadow">
+                <h5>Daily Check-ins (Last 7 Days)</h5>
+                <canvas id="chart_last7"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>

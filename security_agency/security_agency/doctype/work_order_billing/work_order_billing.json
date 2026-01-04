@@ -1,0 +1,233 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:WOB-{MM}-{#####}",
+ "creation": "2025-07-02 22:36:56.868692",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "site_name",
+  "upload_date",
+  "work_order_pdf",
+  "amount",
+  "column_break_blln",
+  "payment_due_date",
+  "total_present_days",
+  "define_rate_breakup_section",
+  "rate_breakup",
+  "section_break_mogi",
+  "column_break_wapx",
+  "job_rate_details",
+  "attendance_xls",
+  "generate_invoice",
+  "guard_attendance_table",
+  "zoho_tab",
+  "invoice_style",
+  "zoho_customer",
+  "invoice_lines",
+  "sac_code",
+  "bill_month",
+  "customer_notes",
+  "terms_conditions",
+  "section_break_ooal",
+  "zoho_invoice_id",
+  "zoho_invoice_pdf_url",
+  "column_break_vblr",
+  "send_invoice_email_to_generate_pdf",
+  "section_break_izyz",
+  "push_to_zoho",
+  "column_break_fgxa"
+ ],
+ "fields": [
+  {
+   "fieldname": "site_name",
+   "fieldtype": "Link",
+   "label": "Site Name",
+   "options": "Site"
+  },
+  {
+   "fieldname": "work_order_pdf",
+   "fieldtype": "Attach",
+   "label": "Work Order PDF"
+  },
+  {
+   "fieldname": "payment_due_date",
+   "fieldtype": "Date",
+   "label": "Payment Due Date"
+  },
+  {
+   "fieldname": "attendance_xls",
+   "fieldtype": "Attach",
+   "label": "Attendance XLS"
+  },
+  {
+   "fieldname": "total_present_days",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Total Present Days"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Amount"
+  },
+  {
+   "fieldname": "generate_invoice",
+   "fieldtype": "Button",
+   "label": "Generate Invoice"
+  },
+  {
+   "fieldname": "upload_date",
+   "fieldtype": "Date",
+   "label": "Upload Date"
+  },
+  {
+   "fieldname": "column_break_blln",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_mogi",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_wapx",
+   "fieldtype": "Column Break",
+   "options": "Job Rate Table"
+  },
+  {
+   "fieldname": "job_rate_details",
+   "fieldtype": "Table",
+   "label": "Job Rate Details",
+   "options": "Job Rate Table 2"
+  },
+  {
+   "fieldname": "guard_attendance_table",
+   "fieldtype": "Table",
+   "label": "Guard Attendance Table",
+   "options": "Guard Attendance Entry"
+  },
+  {
+   "fieldname": "define_rate_breakup_section",
+   "fieldtype": "Section Break",
+   "label": "Define Rate Breakup"
+  },
+  {
+   "fieldname": "rate_breakup",
+   "fieldtype": "Table",
+   "label": "Rate BreakUP",
+   "options": "Charges Breakup Work Order Billing"
+  },
+  {
+   "fieldname": "zoho_tab",
+   "fieldtype": "Tab Break",
+   "label": "Zoho"
+  },
+  {
+   "fieldname": "invoice_lines",
+   "fieldtype": "Table",
+   "label": "Invoice Line Items",
+   "options": "Work Order Invoice Line"
+  },
+  {
+   "fieldname": "zoho_invoice_id",
+   "fieldtype": "Data",
+   "label": "Zoho Invoice Id"
+  },
+  {
+   "fieldname": "zoho_invoice_pdf_url",
+   "fieldtype": "Data",
+   "label": "Zoho Invoice PDF URL"
+  },
+  {
+   "fieldname": "zoho_customer",
+   "fieldtype": "Link",
+   "label": "Zoho Customer",
+   "options": "Zoho Customer"
+  },
+  {
+   "fieldname": "push_to_zoho",
+   "fieldtype": "Button",
+   "label": "Push Invoice to Zoho"
+  },
+  {
+   "fieldname": "sac_code",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "SAC Code"
+  },
+  {
+   "fieldname": "bill_month",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Bill Month",
+   "options": "\nJanuary\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
+  },
+  {
+   "fieldname": "customer_notes",
+   "fieldtype": "Small Text",
+   "label": "Customer Notes"
+  },
+  {
+   "default": "SGST @ 09% (As RCM)\nCGST @ 09% (As RCM)",
+   "fieldname": "terms_conditions",
+   "fieldtype": "Small Text",
+   "label": "Terms & Conditions"
+  },
+  {
+   "fieldname": "section_break_ooal",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_vblr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_invoice_email_to_generate_pdf",
+   "fieldtype": "Check",
+   "label": "Send Invoice Email to Generate PDF"
+  },
+  {
+   "fieldname": "section_break_izyz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_fgxa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "invoice_style",
+   "fieldtype": "Select",
+   "label": "Invoice Style",
+   "options": "\nStyle A\nStyle B"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-09-14 19:04:37.176081",
+ "modified_by": "Administrator",
+ "module": "Security Agency",
+ "name": "Work Order Billing",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

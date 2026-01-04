@@ -1,0 +1,95 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-28 01:56:53.331237",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "site",
+  "column_break_bhaf",
+  "month",
+  "year",
+  "section_break_bjkr",
+  "get_guards",
+  "section_break_dtpr",
+  "bulk_site_salary_slip_employee",
+  "section_break_mgbk",
+  "create_salary_slips"
+ ],
+ "fields": [
+  {
+   "fieldname": "site",
+   "fieldtype": "Link",
+   "label": "Site",
+   "options": "Site"
+  },
+  {
+   "fieldname": "column_break_bhaf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "month",
+   "fieldtype": "Select",
+   "label": "Month",
+   "options": "\nJanuary\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
+  },
+  {
+   "fieldname": "year",
+   "fieldtype": "Data",
+   "label": "Year"
+  },
+  {
+   "fieldname": "section_break_mgbk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "create_salary_slips",
+   "fieldtype": "Button",
+   "label": "Create Salary Slips"
+  },
+  {
+   "fieldname": "section_break_dtpr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "bulk_site_salary_slip_employee",
+   "fieldtype": "Table",
+   "label": "Bulk Site Salary Slip Employee",
+   "options": "Bulk Site Salary Slip Employee"
+  },
+  {
+   "fieldname": "section_break_bjkr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "get_guards",
+   "fieldtype": "Button",
+   "label": "Get Guards"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-09-28 02:15:12.584453",
+ "modified_by": "Administrator",
+ "module": "Security Agency",
+ "name": "Bulk Site Salary Slip Tool",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
