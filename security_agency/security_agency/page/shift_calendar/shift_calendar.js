@@ -1,5 +1,4 @@
 frappe.pages['shift-calendar'].on_page_load = function (wrapper) {
-
     frappe.require(
         ['https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'],
         () => init_page(wrapper)
@@ -15,7 +14,7 @@ function init_page(wrapper) {
     });
 
     // ---------------- FILTERS ----------------
-    let site = page.add_field({
+    const site = page.add_field({
         fieldtype: 'Link',
         label: 'Site',
         fieldname: 'site',
@@ -23,7 +22,7 @@ function init_page(wrapper) {
         reqd: 1
     });
 
-    let month = page.add_field({
+    const month = page.add_field({
         fieldtype: 'Date',
         label: 'Month',
         fieldname: 'month',
@@ -36,8 +35,25 @@ function init_page(wrapper) {
     page.add_button('Calendar View', load_calendar);
     page.add_button('Print', () => window.print());
 
+    // ✅ CORRECT Excel Export (NO frappe.call)
+    page.add_button('Export Excel', () => {
+
+        if (!site.get_value() || !month.get_value()) {
+            frappe.msgprint('Please select Site and Month');
+            return;
+        }
+
+        const url =
+            '/api/method/security_agency.security_agency.page.shift_calendar.shift_calendar.export_shift_calendar_excel'
+            + '?site=' + encodeURIComponent(site.get_value())
+            + '&month=' + encodeURIComponent(month.get_value());
+
+        window.open(url);
+    });
+
     // ---------------- CONTAINERS ----------------
     const table_container = $('<div></div>').appendTo(page.body);
+
     const calendar_container = $('<div id="calendar"></div>')
         .css({ minHeight: '700px' })
         .hide()
@@ -64,7 +80,7 @@ function init_page(wrapper) {
 
         get_data(data => {
             let html = `
-                <table class="table table-bordered">
+                <table class="table table-bordered table-sm">
                     <thead>
                         <tr>
                             <th>Guard</th>
@@ -97,27 +113,45 @@ function init_page(wrapper) {
 
         get_data(data => {
 
-            const events = data.map(r => ({
-                title: `${r.guard} (${r.shift})`,
-                start: r.date,
-                allDay: true
-            }));
+            const shiftColors = {
+                "A SHIFT": "#28a745",
+                "B SHIFT": "#007bff",
+                "C SHIFT": "#6f42c1"
+            };
+
+            const events = data.map(r => {
+                let color = "#343a40";
+
+                Object.keys(shiftColors).forEach(shift => {
+                    if (r.shift && r.shift.includes(shift)) {
+                        color = shiftColors[shift];
+                    }
+                });
+
+                return {
+                    title: `${r.guard} (${r.shift})`,
+                    start: r.date,
+                    allDay: true,
+                    backgroundColor: color,
+                    borderColor: color,
+                    textColor: "#ffffff"
+                };
+            });
 
             if (calendar) calendar.destroy();
 
-            calendar = new FullCalendar.Calendar(
-                calendar_container[0],
-                {
-                    initialView: 'dayGridMonth',
-                    height: 700,
-                    events: events
-                }
-            );
+            calendar = new FullCalendar.Calendar(calendar_container[0], {
+                initialView: 'dayGridMonth',
+                height: 700,
+                events: events,
+                eventDisplay: 'block',
+                dayMaxEventRows: false
+            });
 
             calendar.render();
         });
     }
 
-    // Default
+    // ---------------- DEFAULT ----------------
     load_table();
 }

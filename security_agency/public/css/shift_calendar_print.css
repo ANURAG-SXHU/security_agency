@@ -16,3 +16,28 @@
         font-size: 12px;
     }
 }
+/* Make events readable */
+.fc-event {
+    font-size: 11px !important;
+    font-weight: 600;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+/* Prevent light background */
+.fc-daygrid-event {
+    background-color: #343a40 !important;
+    color: #fff !important;
+}
+
+/* Improve stacking */
+.fc-daygrid-day-events {
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* Date number visibility */
+.fc-daygrid-day-number {
+    font-weight: bold;
+    color: #000;
+}
