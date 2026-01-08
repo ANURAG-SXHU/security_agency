@@ -117,6 +117,7 @@ def get_shift_calendar(site, month):
 def export_shift_calendar_excel(site, month):
     """
     Export Shift Calendar to Excel (Calendar Layout)
+    SAFE VERSION – handles None shifts
     """
 
     if not site:
@@ -155,7 +156,8 @@ def export_shift_calendar_excel(site, month):
     shift_fills = {
         "A SHIFT": PatternFill("solid", fgColor="C6EFCE"),  # green
         "B SHIFT": PatternFill("solid", fgColor="BDD7EE"),  # blue
-        "C SHIFT": PatternFill("solid", fgColor="E4D7F5")   # purple
+        "C SHIFT": PatternFill("solid", fgColor="E4D7F5"),  # purple
+        "UNASSIGNED": PatternFill("solid", fgColor="F8CBAD")  # red (optional)
     }
 
     # ---------------- TITLE ----------------
@@ -176,7 +178,9 @@ def export_shift_calendar_excel(site, month):
     # ---------------- GROUP DATA BY DATE ----------------
     data_map = {}
     for r in data:
-        data_map.setdefault(r["date"], []).append(r)
+        date_key = r.get("date")
+        if date_key:
+            data_map.setdefault(date_key, []).append(r)
 
     cal = calendar.monthcalendar(year, month_num)
     start_row = 4
@@ -194,10 +198,13 @@ def export_shift_calendar_excel(site, month):
 
             if date_str in data_map:
                 for r in data_map[date_str]:
-                    lines.append(f'{r["guard"]} ({r["shift"]})')
+                    guard = r.get("guard") or "Unknown Guard"
+                    shift_value = r.get("shift") or "UNASSIGNED"
 
-                    for shift, fill in shift_fills.items():
-                        if shift in r["shift"]:
+                    lines.append(f"{guard} ({shift_value})")
+
+                    for shift_key, fill in shift_fills.items():
+                        if shift_key in shift_value:
                             cell.fill = fill
 
             cell.value = "\n".join(lines)
