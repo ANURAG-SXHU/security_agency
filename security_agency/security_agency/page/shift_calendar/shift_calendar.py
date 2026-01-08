@@ -2,27 +2,38 @@ import frappe
 from frappe.utils import getdate, add_days
 from datetime import date
 import calendar
-from frappe.utils.xlsxutils import make_xlsx
 
 
+# =========================================================
+# MAIN DATA SOURCE (USED BY TABLE + CALENDAR + EXCEL)
+# =========================================================
 @frappe.whitelist()
 def get_shift_calendar(site, month):
     """
-    Generate planned shift calendar (NO attendance)
-    Based on Guard Shift Rotation
+    Generate planned shift calendar
+    Rotation is carried forward week-by-week across months
+    SAFE DEBUG VERSION (Frappe v15 compatible)
     """
 
-    if not site or not month:
-        return []
+    # ---------------- GUARDS ----------------
+    if not site:
+        frappe.throw("Site is required")
+
+    if not month:
+        frappe.throw("Month is required")
 
     month_date = getdate(month)
     year = month_date.year
     month_num = month_date.month
 
-    last_day = calendar.monthrange(year, month_num)[1]
+    month_start = date(year, month_num, 1)
+    month_end = date(year, month_num, calendar.monthrange(year, month_num)[1])
 
-    start_date = date(year, month_num, 1)
-    end_date = date(year, month_num, last_day)
+    # ---------------- SAFE DEBUG ----------------
+    frappe.log_error(
+        f"Site={site}, Month={month}, Start={month_start}, End={month_end}",
+        "SHIFT CALENDAR DEBUG: Month Info"
+    )
 
     rotations = frappe.get_all(
         "Guard Shift Rotation",
@@ -35,13 +46,21 @@ def get_shift_calendar(site, month):
         ]
     )
 
+    frappe.log_error(
+        f"Rotations found={len(rotations)}",
+        "SHIFT CALENDAR DEBUG: Rotations Found"
+    )
+
     results = []
 
     for rot in rotations:
         rot_doc = frappe.get_doc("Guard Shift Rotation", rot.name)
 
-        # Skip if no rotation items
         if not rot_doc.guard_shift_rotation_item:
+            frappe.log_error(
+                f"Rotation {rot.name} has no rotation items",
+                "SHIFT CALENDAR DEBUG: Empty Rotation"
+            )
             continue
 
         sequence = sorted(
@@ -49,67 +68,89 @@ def get_shift_calendar(site, month):
             key=lambda r: r.order
         )
 
-        d = start_date
-        while d <= end_date:
+        # ---------------- ROTATION LOG ----------------
+        frappe.log_error(
+            f"Rotation={rot.name}, Guard={rot.guard}, "
+            f"Weekday={rot.day_of_week}, "
+            f"Start={rot.rotation_start_date}, "
+            f"Sequence={len(sequence)}",
+            "SHIFT CALENDAR DEBUG: Rotation Details"
+        )
 
-            # Match weekday
-            if d.strftime("%A") != rot.day_of_week:
-                d = add_days(d, 1)
-                continue
+        # 🔑 Start from rotation start date
+        d = rot.rotation_start_date
 
-            # Rotation must start after rotation_start_date
-            if d < rot.rotation_start_date:
-                d = add_days(d, 1)
-                continue
+        # Align weekday
+        while d.strftime("%A") != rot.day_of_week:
+            d = add_days(d, 1)
 
-            weeks_passed = ((d - rot.rotation_start_date).days) // 7
-            index = weeks_passed % len(sequence)
+        index = 0
 
-            shift = sequence[index].shift_type
+        while d <= month_end:
 
-            guard_name = frappe.db.get_value(
-                "Employee",
-                rot.guard,
-                "employee_name"
-            )
+            if d >= month_start:
+                shift = sequence[index % len(sequence)].shift_type
 
-            results.append({
-                "guard": guard_name,
-                "date": str(d),
-                "shift": shift
-            })
+                guard_name = frappe.db.get_value(
+                    "Employee",
+                    rot.guard,
+                    "employee_name"
+                )
 
+                results.append({
+                    "guard": guard_name,
+                    "date": str(d),
+                    "shift": shift
+                })
+
+            index += 1
             d = add_days(d, 7)
 
-    return results
+    # ---------------- FINAL DEBUG ----------------
+    frappe.log_error(
+        f"Total shifts generated={len(results)}",
+        "SHIFT CALENDAR DEBUG: Final Results"
+    )
 
+    return results
 @frappe.whitelist()
 def export_shift_calendar_excel(site, month):
-    import calendar
-    from datetime import datetime
+    """
+    Export Shift Calendar to Excel (Calendar Layout)
+    """
+
+    if not site:
+        frappe.throw("Site is required")
+
+    if not month:
+        frappe.throw("Month is required")
+
     from openpyxl import Workbook
     from openpyxl.styles import PatternFill, Font, Alignment
     from frappe.utils import getdate
+    from datetime import date
+    import calendar
+    from io import BytesIO
 
-    if not site or not month:
-        frappe.throw("Site and Month are required")
-
+    # ---------------- GET DATA ----------------
     data = get_shift_calendar(site, month)
     if not data:
-        frappe.throw("No data found")
+        frappe.throw("No shift data found for selected month")
 
     month_date = getdate(month)
     year = month_date.year
     month_num = month_date.month
 
+    # ---------------- WORKBOOK ----------------
     wb = Workbook()
     ws = wb.active
     ws.title = "Shift Calendar"
 
+    center = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
     # ---------------- STYLES ----------------
     header_fill = PatternFill("solid", fgColor="DDDDDD")
     header_font = Font(bold=True)
-    center = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
     shift_fills = {
         "A SHIFT": PatternFill("solid", fgColor="C6EFCE"),  # green
@@ -130,16 +171,15 @@ def export_shift_calendar_excel(site, month):
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = center
-        ws.column_dimensions[chr(64 + col)].width = 22
+        ws.column_dimensions[chr(64 + col)].width = 30
 
-    # ---------------- BUILD CALENDAR ----------------
-    cal = calendar.monthcalendar(year, month_num)
-    start_row = 4
-
-    # Group data by date
+    # ---------------- GROUP DATA BY DATE ----------------
     data_map = {}
     for r in data:
         data_map.setdefault(r["date"], []).append(r)
+
+    cal = calendar.monthcalendar(year, month_num)
+    start_row = 4
 
     for week in cal:
         for col, day in enumerate(week, start=1):
@@ -150,10 +190,9 @@ def export_shift_calendar_excel(site, month):
                 continue
 
             date_str = f"{year}-{month_num:02d}-{day:02d}"
-            cell.value = str(day)
+            lines = [str(day)]
 
             if date_str in data_map:
-                lines = []
                 for r in data_map[date_str]:
                     lines.append(f'{r["guard"]} ({r["shift"]})')
 
@@ -161,12 +200,11 @@ def export_shift_calendar_excel(site, month):
                         if shift in r["shift"]:
                             cell.fill = fill
 
-                cell.value = f"{day}\n" + "\n".join(lines)
+            cell.value = "\n".join(lines)
 
         start_row += 1
 
-    # ---------------- EXPORT RESPONSE ----------------
-    from io import BytesIO
+    # ---------------- RESPONSE ----------------
     file_stream = BytesIO()
     wb.save(file_stream)
 

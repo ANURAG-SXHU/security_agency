@@ -35,9 +35,7 @@ function init_page(wrapper) {
     page.add_button('Calendar View', load_calendar);
     page.add_button('Print', () => window.print());
 
-    // ✅ CORRECT Excel Export (NO frappe.call)
     page.add_button('Export Excel', () => {
-
         if (!site.get_value() || !month.get_value()) {
             frappe.msgprint('Please select Site and Month');
             return;
@@ -61,8 +59,13 @@ function init_page(wrapper) {
 
     let calendar = null;
 
-    // ---------------- DATA FETCH ----------------
+    // ---------------- DATA FETCH (SAFE) ----------------
     function get_data(callback) {
+        if (!site.get_value() || !month.get_value()) {
+            callback([]);
+            return;
+        }
+
         frappe.call({
             method: 'security_agency.security_agency.page.shift_calendar.shift_calendar.get_shift_calendar',
             args: {
@@ -78,7 +81,19 @@ function init_page(wrapper) {
         calendar_container.hide();
         table_container.show().empty();
 
+        if (!site.get_value() || !month.get_value()) {
+            frappe.msgprint('Please select Site and Month');
+            return;
+        }
+
         get_data(data => {
+            if (!data.length) {
+                table_container.html(
+                    '<div class="text-muted">No shifts found for selected month</div>'
+                );
+                return;
+            }
+
             let html = `
                 <table class="table table-bordered table-sm">
                     <thead>
@@ -111,7 +126,30 @@ function init_page(wrapper) {
         table_container.hide();
         calendar_container.show();
 
+        if (!site.get_value() || !month.get_value()) {
+            frappe.msgprint('Please select Site and Month');
+            return;
+        }
+
+        const month_start = moment(month.get_value())
+            .startOf('month')
+            .toDate();
+
+        const m = moment(month_start);
+        page.set_title(`Shift Calendar - ${m.format('MMMM YYYY')}`);
+
         get_data(data => {
+
+            console.log('🟢 Calendar backend data:', data);
+
+            if (!data.length) {
+                calendar_container.html(
+                    `<div class="text-muted">
+                        No shifts found for ${m.format('MMMM YYYY')}
+                    </div>`
+                );
+                return;
+            }
 
             const shiftColors = {
                 "A SHIFT": "#28a745",
@@ -130,7 +168,7 @@ function init_page(wrapper) {
 
                 return {
                     title: `${r.guard} (${r.shift})`,
-                    start: r.date,
+                    start: moment(r.date, 'YYYY-MM-DD').toDate(),
                     allDay: true,
                     backgroundColor: color,
                     borderColor: color,
@@ -138,19 +176,36 @@ function init_page(wrapper) {
                 };
             });
 
-            if (calendar) calendar.destroy();
+            if (calendar) {
+                calendar.destroy();
+                calendar = null;
+            }
 
-            calendar = new FullCalendar.Calendar(calendar_container[0], {
-                initialView: 'dayGridMonth',
-                height: 700,
-                events: events,
-                eventDisplay: 'block',
-                dayMaxEventRows: false
-            });
+            setTimeout(() => {
+                calendar = new FullCalendar.Calendar(calendar_container[0], {
+                    initialView: 'dayGridMonth',
+                    initialDate: month_start,
 
-            calendar.render();
+                    headerToolbar: false,
+                    showNonCurrentDates: false,
+                    fixedWeekCount: false,
+
+                    height: 700,
+                    events: events
+                });
+
+                calendar.render();
+                calendar.gotoDate(month_start);
+            }, 50);
         });
     }
+
+    // ---------------- AUTO RELOAD ----------------
+    month.$input.on('change', () => {
+        if (calendar_container.is(':visible') && site.get_value()) {
+            load_calendar();
+        }
+    });
 
     // ---------------- DEFAULT ----------------
     load_table();
