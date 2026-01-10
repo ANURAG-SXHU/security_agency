@@ -18618,7 +18618,7 @@
  },
  {
   "charts": [],
-  "content": "[{\"id\":\"niK__7HNcg\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Operations Module</span>\",\"col\":12}},{\"id\":\"MnF7fhPDwL\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"GPS Dashboard\",\"col\":3}},{\"id\":\"-fLZrr2uY5\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Employee\",\"col\":3}},{\"id\":\"t6ehryKYpg\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Check In\",\"col\":3}},{\"id\":\"BrbknlYA_j\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Check In List\",\"col\":3}},{\"id\":\"M2825JSrfR\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Attendance\",\"col\":3}},{\"id\":\"NOqfecWan9\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Automatic Check In\",\"col\":3}},{\"id\":\"45KkJZoIYM\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Site Master\",\"col\":3}},{\"id\":\"Eu7mE2gimA\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Deployment Sheet\",\"col\":3}},{\"id\":\"mCTK9KxHGn\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Attendance Anomaly\",\"col\":3}},{\"id\":\"zI8YPm-nUt\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Bulk Guard Shift Rotation\",\"col\":3}},{\"id\":\"zFOoRpKAfR\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Guard Shift Rotation\",\"col\":3}},{\"id\":\"NHj8yaycGj\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Shift Adjustment\",\"col\":3}},{\"id\":\"o27OqYi80S\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Shift Calender\",\"col\":3}}]",
+  "content": "[{\"id\":\"niK__7HNcg\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Operations Module</span>\",\"col\":12}},{\"id\":\"MnF7fhPDwL\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"GPS Dashboard\",\"col\":3}},{\"id\":\"-fLZrr2uY5\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Employee\",\"col\":3}},{\"id\":\"t6ehryKYpg\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Check In\",\"col\":3}},{\"id\":\"BrbknlYA_j\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Check In List\",\"col\":3}},{\"id\":\"M2825JSrfR\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Attendance\",\"col\":3}},{\"id\":\"NOqfecWan9\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Automatic Check In\",\"col\":3}},{\"id\":\"45KkJZoIYM\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Site Master\",\"col\":3}},{\"id\":\"Eu7mE2gimA\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Deployment Sheet\",\"col\":3}},{\"id\":\"mCTK9KxHGn\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Attendance Anomaly\",\"col\":3}},{\"id\":\"zI8YPm-nUt\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Bulk Guard Shift Rotation\",\"col\":3}},{\"id\":\"zFOoRpKAfR\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Guard Shift Rotation\",\"col\":3}},{\"id\":\"NHj8yaycGj\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Shift Adjustment\",\"col\":3}},{\"id\":\"o27OqYi80S\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Shift Calender\",\"col\":3}},{\"id\":\"cQcJdqmN-H\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Guard Live Map\",\"col\":3}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -18629,7 +18629,7 @@
   "is_hidden": 0,
   "label": "Operations Module",
   "links": [],
-  "modified": "2026-01-08 11:27:53.730541",
+  "modified": "2026-01-10 09:37:34.232860",
   "module": null,
   "name": "Operations Module",
   "number_cards": [],
@@ -18640,6 +18640,23 @@
   "roles": [],
   "sequence_id": 39.0,
   "shortcuts": [
+   {
+    "color": "Grey",
+    "doc_view": "List",
+    "format": null,
+    "icon": null,
+    "kanban_board": null,
+    "label": "Guard Live Map",
+    "link_to": null,
+    "parent": "Operations Module",
+    "parentfield": "shortcuts",
+    "parenttype": "Workspace",
+    "report_ref_doctype": null,
+    "restrict_to_domain": null,
+    "stats_filter": null,
+    "type": "URL",
+    "url": "/guard-map"
+   },
    {
     "color": "Grey",
     "doc_view": "List",

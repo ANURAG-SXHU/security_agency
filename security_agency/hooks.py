@@ -44,6 +44,15 @@ fixtures = [
     # }
 ]
 
+# # hooks.py
+# fixtures = [
+#     {
+#         "doctype": "Web Page",
+#         "filters": [
+#             ["name", "in", ["Guard Live Map"]]
+#         ]
+#     }
+# ]
 
 home_page = "app/operations-module"
 

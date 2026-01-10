@@ -3,12 +3,6 @@ from frappe.utils import now_datetime
 
 @frappe.whitelist(allow_guest=False)
 def check_in(latitude=None, longitude=None, user_email=None):
-    """
-    ✅ Secure Check-in API
-    Auth via API key (e.g., mobile.checkin@mtss.com),
-    Creates Check-in for user_email → employee.
-    """
-
     # 🔐 Block unauthenticated users
     if frappe.session.user == "Guest":
         return {
