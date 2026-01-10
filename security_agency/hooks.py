@@ -29,30 +29,30 @@ app_include_css = [
     "https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
 ]
 
-fixtures = [
-    {"doctype": "Workspace"},
-    {"doctype": "Workflow"},
-    {"doctype": "Workflow State"},
-    {"doctype": "Workflow Action Master"},
-    {"doctype": "Role", "filters": [["role_name", "in", ["Guard", "Supervisor", "Field Officer"]]]},
-    # 👇 Add this block
-    # {
-    #     "doctype": "DocType",
-    #     "filters": [
-    #         ["name", "in", ["Bulk Site Salary Slip Tool"]]
-    #     ]
-    # }
-]
-
-# # hooks.py
 # fixtures = [
-#     {
-#         "doctype": "Web Page",
-#         "filters": [
-#             ["name", "in", ["Guard Live Map"]]
-#         ]
-#     }
+#     {"doctype": "Workspace"},
+#     {"doctype": "Workflow"},
+#     {"doctype": "Workflow State"},
+#     {"doctype": "Workflow Action Master"},
+#     {"doctype": "Role", "filters": [["role_name", "in", ["Guard", "Supervisor", "Field Officer"]]]},
+#     # 👇 Add this block
+#     # {
+#     #     "doctype": "DocType",
+#     #     "filters": [
+#     #         ["name", "in", ["Bulk Site Salary Slip Tool"]]
+#     #     ]
+#     # }
 # ]
+
+# hooks.py
+fixtures = [
+    {
+        "doctype": "Web Page",
+        "filters": [
+            ["name", "in", ["Guard Live Map"]]
+        ]
+    }
+]
 
 home_page = "app/operations-module"
 
