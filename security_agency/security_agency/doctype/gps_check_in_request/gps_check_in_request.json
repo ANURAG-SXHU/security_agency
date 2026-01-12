@@ -10,6 +10,7 @@
   "selfie",
   "upload_selfie",
   "submit",
+  "camera_capture",
   "column_break_awky",
   "site",
   "status",
@@ -142,13 +143,18 @@
    "fieldtype": "Select",
    "label": "Attendance Status",
    "options": "\nPresent\nAbsent"
+  },
+  {
+   "fieldname": "camera_capture",
+   "fieldtype": "HTML",
+   "label": "Upload Selfie"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-20 15:51:46.577947",
+ "modified": "2026-01-12 11:08:09.640818",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "GPS Check-in Request",
