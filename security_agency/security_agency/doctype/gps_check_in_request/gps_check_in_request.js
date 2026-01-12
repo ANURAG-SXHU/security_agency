@@ -264,106 +264,106 @@ frappe.ui.form.on('GPS Check-in Request', {
     }
 });
 
-frappe.ui.form.on('GPS Check-in Request', {
-    refresh(frm) {
-        // Hide default attach field
-        frm.set_df_property('upload_selfie', 'hidden', 1);
+// frappe.ui.form.on('GPS Check-in Request', {
+//     refresh(frm) {
+//         // Hide default attach field
+//         frm.set_df_property('upload_selfie', 'hidden', 1);
 
-        // Inject camera UI
-        frm.fields_dict.camera_capture.$wrapper.html(`
-            <div style="text-align:center">
-                <video id="gps_video" autoplay playsinline
-                    style="width:100%; max-height:300px; border-radius:8px;"></video>
+//         // Inject camera UI
+//         frm.fields_dict.camera_capture.$wrapper.html(`
+//             <div style="text-align:center">
+//                 <video id="gps_video" autoplay playsinline
+//                     style="width:100%; max-height:300px; border-radius:8px;"></video>
 
-                <canvas id="gps_canvas" style="display:none;"></canvas>
+//                 <canvas id="gps_canvas" style="display:none;"></canvas>
 
-                <br><br>
-                <button class="btn btn-primary" id="gps_capture">
-                    📷 Capture Selfie
-                </button>
-            </div>
-        `);
+//                 <br><br>
+//                 <button class="btn btn-primary" id="gps_capture">
+//                     📷 Capture Selfie
+//                 </button>
+//             </div>
+//         `);
 
-        start_camera();
-        bind_capture(frm);
-    }
-});
+//         start_camera();
+//         bind_capture(frm);
+//     }
+// });
 
-/* ---------------- CAMERA START ---------------- */
+// /* ---------------- CAMERA START ---------------- */
 
-function start_camera() {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        frappe.msgprint("Camera not supported on this device");
-        return;
-    }
+// function start_camera() {
+//     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+//         frappe.msgprint("Camera not supported on this device");
+//         return;
+//     }
 
-    navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user" },
-        audio: false
-    }).then(stream => {
-        const video = document.getElementById("gps_video");
-        video.srcObject = stream;
-        video.play();
-    }).catch(err => {
-        frappe.msgprint("Camera permission denied");
-    });
-}
+//     navigator.mediaDevices.getUserMedia({
+//         video: { facingMode: "user" },
+//         audio: false
+//     }).then(stream => {
+//         const video = document.getElementById("gps_video");
+//         video.srcObject = stream;
+//         video.play();
+//     }).catch(err => {
+//         frappe.msgprint("Camera permission denied");
+//     });
+// }
 
-/* ---------------- CAPTURE HANDLER ---------------- */
+// /* ---------------- CAPTURE HANDLER ---------------- */
 
-function bind_capture(frm) {
-    const btn = document.getElementById("gps_capture");
+// function bind_capture(frm) {
+//     const btn = document.getElementById("gps_capture");
 
-    btn.onclick = () => {
-        const video = document.getElementById("gps_video");
-        const canvas = document.getElementById("gps_canvas");
+//     btn.onclick = () => {
+//         const video = document.getElementById("gps_video");
+//         const canvas = document.getElementById("gps_canvas");
 
-        // ⚠️ Camera not ready yet
-        if (!video.videoWidth || !video.videoHeight) {
-            frappe.msgprint("Camera is not ready yet. Please wait.");
-            return;
-        }
+//         // ⚠️ Camera not ready yet
+//         if (!video.videoWidth || !video.videoHeight) {
+//             frappe.msgprint("Camera is not ready yet. Please wait.");
+//             return;
+//         }
 
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+//         canvas.width = video.videoWidth;
+//         canvas.height = video.videoHeight;
 
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+//         const ctx = canvas.getContext("2d");
+//         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        // ✅ Compress image slightly (mobile friendly)
-        const imageData = canvas.toDataURL("image/jpeg", 0.85);
+//         // ✅ Compress image slightly (mobile friendly)
+//         const imageData = canvas.toDataURL("image/jpeg", 0.85);
 
-        upload_to_frappe(imageData, frm);
-    };
-}
+//         upload_to_frappe(imageData, frm);
+//     };
+// }
 
-/* ---------------- UPLOAD TO FRAPPE ---------------- */
+// /* ---------------- UPLOAD TO FRAPPE ---------------- */
 
-function upload_to_frappe(imageData, frm) {
-    // ❌ Empty or failed capture
-    if (!imageData || imageData === "data:,") {
-        frappe.msgprint("Selfie capture failed. Please try again.");
-        return;
-    }
+// function upload_to_frappe(imageData, frm) {
+//     // ❌ Empty or failed capture
+//     if (!imageData || imageData === "data:,") {
+//         frappe.msgprint("Selfie capture failed. Please try again.");
+//         return;
+//     }
 
-    // 🔥 IMPORTANT: strip base64 header
-    const base64 = imageData.split(",")[1];
+//     // 🔥 IMPORTANT: strip base64 header
+//     const base64 = imageData.split(",")[1];
 
-    frappe.call({
-        method: "frappe.client.attach_file",
-        args: {
-            doctype: frm.doctype,
-            docname: frm.docname,
-            fieldname: "upload_selfie",
-            filedata: base64,       // ⚠️ base64 ONLY
-            filename: "selfie.jpg"
-        },
-        callback: function () {
-            frappe.show_alert({
-                message: "Selfie captured successfully",
-                indicator: "green"
-            });
-        }
-    });
-}
+//     frappe.call({
+//         method: "frappe.client.attach_file",
+//         args: {
+//             doctype: frm.doctype,
+//             docname: frm.docname,
+//             fieldname: "upload_selfie",
+//             filedata: base64,       // ⚠️ base64 ONLY
+//             filename: "selfie.jpg"
+//         },
+//         callback: function () {
+//             frappe.show_alert({
+//                 message: "Selfie captured successfully",
+//                 indicator: "green"
+//             });
+//         }
+//     });
+// }
 

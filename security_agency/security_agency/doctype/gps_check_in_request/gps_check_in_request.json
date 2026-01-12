@@ -147,6 +147,7 @@
   {
    "fieldname": "camera_capture",
    "fieldtype": "HTML",
+   "hidden": 1,
    "label": "Upload Selfie"
   }
  ],
@@ -154,7 +155,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-12 11:08:09.640818",
+ "modified": "2026-01-12 11:29:34.811985",
  "modified_by": "Administrator",
  "module": "Security Agency",
  "name": "GPS Check-in Request",
