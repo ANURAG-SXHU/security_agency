@@ -199,6 +199,131 @@ def create_attendance_for_employee(
     attendance.insert(ignore_permissions=True)
     attendance.submit()
 
+# # --------------------------------------------------
+# # GPS CHECK-IN PERMISSIONS
+# # --------------------------------------------------
+
+# def get_permission_query_conditions(user):
+#     if not user:
+#         user = frappe.session.user
+
+#     if any(
+#         role in frappe.get_roles(user)
+#         for role in ("Administrator", "Admin", "Operation Manager")
+#     ):
+#         return None
+
+#     emp_id = frappe.db.get_value(
+#         "Employee",
+#         {"user_id": user},
+#         "name"
+#     )
+
+#     if not emp_id:
+#         return "1=0"
+
+#     return (
+#         f"`tabGPS Check-in Request`.employee = '{emp_id}' "
+#         f"OR `tabGPS Check-in Request`.repoting_to = '{emp_id}'"
+#     )
+
+
+# def has_permission(doc, ptype, user):
+#     if any(
+#         role in frappe.get_roles(user)
+#         for role in ("Administrator", "Admin", "Operation Manager")
+#     ):
+#         return True
+
+#     emp_id = frappe.db.get_value(
+#         "Employee",
+#         {"user_id": user},
+#         "name"
+#     )
+
+#     return (
+#         ptype == "create"
+#         or doc.employee == emp_id
+#         or doc.repoting_to == emp_id
+#     )
+
+
+# # --------------------------------------------------
+# # EMPLOYEE PERMISSIONS
+# # --------------------------------------------------
+
+# def get_employee_permission_query_conditions(user):
+#     if not user:
+#         user = frappe.session.user
+
+#     if any(
+#         role in frappe.get_roles(user)
+#         for role in ("Administrator", "Admin", "Operation Manager")
+#     ):
+#         return None
+
+#     emp_id = frappe.db.get_value(
+#         "Employee",
+#         {"user_id": user},
+#         "name"
+#     )
+
+#     return f"`tabEmployee`.name = '{emp_id}'" if emp_id else "1=0"
+
+
+# def has_employee_permission(doc, ptype, user):
+#     if any(
+#         role in frappe.get_roles(user)
+#         for role in ("Administrator", "Admin", "Operation Manager")
+#     ):
+#         return True
+
+#     emp_id = frappe.db.get_value(
+#         "Employee",
+#         {"user_id": user},
+#         "name"
+#     )
+
+#     return doc.name == emp_id
+
+
+# # --------------------------------------------------
+# # ATTENDANCE PERMISSIONS
+# # --------------------------------------------------
+
+# def get_attendance_permission_query_conditions(user):
+#     if not user:
+#         user = frappe.session.user
+
+#     if any(
+#         role in frappe.get_roles(user)
+#         for role in ("Administrator", "Admin", "Operation Manager")
+#     ):
+#         return None
+
+#     emp_id = frappe.db.get_value(
+#         "Employee",
+#         {"user_id": user},
+#         "name"
+#     )
+
+#     return f"`tabAttendance`.employee = '{emp_id}'" if emp_id else "1=0"
+
+
+# def has_attendance_permission(doc, ptype, user):
+#     if any(
+#         role in frappe.get_roles(user)
+#         for role in ("Administrator", "Admin", "Operation Manager")
+#     ):
+#         return True
+
+#     emp_id = frappe.db.get_value(
+#         "Employee",
+#         {"user_id": user},
+#         "name"
+#     )
+
+#     return doc.employee == emp_id
 # --------------------------------------------------
 # GPS CHECK-IN PERMISSIONS
 # --------------------------------------------------
@@ -207,21 +332,34 @@ def get_permission_query_conditions(user):
     if not user:
         user = frappe.session.user
 
-    if any(
-        role in frappe.get_roles(user)
-        for role in ("Administrator", "Admin", "Operation Manager")
-    ):
+    roles = frappe.get_roles(user)
+
+    # Full access roles
+    if any(role in roles for role in ("Administrator", "Admin", "Operation Manager")):
         return None
 
-    emp_id = frappe.db.get_value(
+    emp = frappe.db.get_value(
         "Employee",
         {"user_id": user},
-        "name"
+        ["name", "designation"],
+        as_dict=True
     )
 
-    if not emp_id:
+    if not emp:
         return "1=0"
 
+    emp_id = emp.name
+    designation = emp.designation
+
+    # 🔴 Supervisor restriction
+    if designation == "Supervisor":
+        return (
+            f"`tabGPS Check-in Request`.workflow_state = 'Pending(Supervisor)' "
+            f"AND (`tabGPS Check-in Request`.repoting_to = '{emp_id}' "
+            f"OR `tabGPS Check-in Request`.employee = '{emp_id}')"
+        )
+
+    # 👤 Normal employee access
     return (
         f"`tabGPS Check-in Request`.employee = '{emp_id}' "
         f"OR `tabGPS Check-in Request`.repoting_to = '{emp_id}'"
@@ -229,17 +367,30 @@ def get_permission_query_conditions(user):
 
 
 def has_permission(doc, ptype, user):
-    if any(
-        role in frappe.get_roles(user)
-        for role in ("Administrator", "Admin", "Operation Manager")
-    ):
+    roles = frappe.get_roles(user)
+
+    if any(role in roles for role in ("Administrator", "Admin", "Operation Manager")):
         return True
 
-    emp_id = frappe.db.get_value(
+    emp = frappe.db.get_value(
         "Employee",
         {"user_id": user},
-        "name"
+        ["name", "designation"],
+        as_dict=True
     )
+
+    if not emp:
+        return False
+
+    emp_id = emp.name
+    designation = emp.designation
+
+    # 🔴 Supervisor rule
+    if designation == "Supervisor":
+        return (
+            doc.workflow_state == "Pending(Supervisor)"
+            and (doc.employee == emp_id or doc.repoting_to == emp_id)
+        )
 
     return (
         ptype == "create"
