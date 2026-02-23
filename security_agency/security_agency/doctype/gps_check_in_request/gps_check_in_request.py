@@ -334,7 +334,6 @@ def get_permission_query_conditions(user):
 
     roles = frappe.get_roles(user)
 
-    # Full access roles
     if any(role in roles for role in ("Administrator", "Admin", "Operation Manager")):
         return None
 
@@ -349,17 +348,15 @@ def get_permission_query_conditions(user):
         return "1=0"
 
     emp_id = emp.name
-    designation = emp.designation
 
-    # 🔴 Supervisor restriction
-    if designation == "Supervisor":
+    # Supervisor sees only Pending(Supervisor)
+    if emp.designation == "Supervisor":
         return (
             f"`tabGPS Check-in Request`.workflow_state = 'Pending(Supervisor)' "
             f"AND (`tabGPS Check-in Request`.repoting_to = '{emp_id}' "
             f"OR `tabGPS Check-in Request`.employee = '{emp_id}')"
         )
 
-    # 👤 Normal employee access
     return (
         f"`tabGPS Check-in Request`.employee = '{emp_id}' "
         f"OR `tabGPS Check-in Request`.repoting_to = '{emp_id}'"
@@ -367,35 +364,29 @@ def get_permission_query_conditions(user):
 
 
 def has_permission(doc, ptype, user):
-    roles = frappe.get_roles(user)
-
-    if any(role in roles for role in ("Administrator", "Admin", "Operation Manager")):
+    # Admin-level roles → full access
+    if any(
+        role in frappe.get_roles(user)
+        for role in ("Administrator", "Admin", "Operation Manager")
+    ):
         return True
 
-    emp = frappe.db.get_value(
+    # Get employee linked to user
+    emp_id = frappe.db.get_value(
         "Employee",
         {"user_id": user},
-        ["name", "designation"],
-        as_dict=True
+        "name"
     )
 
-    if not emp:
+    # If no employee linked → deny
+    if not emp_id:
         return False
 
-    emp_id = emp.name
-    designation = emp.designation
-
-    # 🔴 Supervisor rule
-    if designation == "Supervisor":
-        return (
-            doc.workflow_state == "Pending(Supervisor)"
-            and (doc.employee == emp_id or doc.repoting_to == emp_id)
-        )
-
+    # Allow actions
     return (
-        ptype == "create"
-        or doc.employee == emp_id
-        or doc.repoting_to == emp_id
+        ptype == "create"          # allow creating new requests
+        or doc.employee == emp_id  # own records
+        or doc.repoting_to == emp_id  # assigned supervisor
     )
 
 
